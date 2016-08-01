@@ -4,6 +4,7 @@ import shapes::IFigure;
 import util::ShellExec;
 import util::Reflective;
 import Prelude;
+import util::Resources;
 
 public void renderWeb(
       Figure fig1, int width = -1, int height = -1, int lineWidth = -1,
@@ -21,11 +22,12 @@ public void renderWeb(
      cssFile = cssFile, defined = defined, lineWidth = lineWidth, event = event
      );  
      if (!eclipse) {
-         // println(getSite().uri);
-         str classpath = getOneFrom([x|x<-split(":", getRascalClasspath()), endsWith(x,"html2png.jar")]);
+        loc home = location(|project://shapes|);
+        //  str classpath = getOneFrom([x|x<-split(":", getRascalClasspath()), endsWith(x,"html2png.jar")]);
+        loc classpath=home+"lib/html2png.jar";
          javaLoc=javaLoc+"bin"+"java";
           PID pid = createProcess(javaLoc.path
-         ,args=["-jar", classpath, getSite().uri, snapshot?pngFile.uri:"", "<screenWidth>", "<screenHeight>",snapshot?"true":"false"]
+         ,args=["-jar", classpath.path, getSite().uri, snapshot?pngFile.uri:"", "<screenWidth>", "<screenHeight>",snapshot?"true":"false"]
          );
          }
      }
