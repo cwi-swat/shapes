@@ -351,7 +351,7 @@ data NodeProperty = nodeProperty(str shape="",str labelStyle="", str style = "",
 data Edge = edge(str from, str to, str label = "", str lineInterpolate="basis" // linear, step-before, step-after
      , str lineColor = "" ,str labelStyle="", str arrowheadStyle = "" // normal, vee, undirected
      , str id = "", str labelPos= "r"  // l, r, c
-     , int labelOffset = 10);
+     , int labelOffset = 10, int lineWidth = -1);
   
 data ChartArea ( 
      value left = "",

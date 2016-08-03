@@ -245,7 +245,7 @@ str visitFig(IFigure fig) {
 str visitTooltipFigs() {
     if (isEmpty(panels) && isEmpty(tooltips)) return "";
     str r =
-"\<div class=\"panel\"\>\<svg id = \"panel\" width=<upperBound> height=<upperBound> \>";
+"\<div class=\"panel\"\>\<svg id = \"panel\" width=<0> height=<0> \>";
     for (IFigure fi<-panels) {
          if (g:ifigure(str id, _):=fi) {
             // r+= "\<foreignObject id=\"<id>_fox\" x=\"<getAtX(g)>\" y=\"<getAtY(g)>\" width=\"<upperBound>px\" height=\"<upperBound>px\"\>" ;
@@ -255,7 +255,7 @@ str visitTooltipFigs() {
          }
     r+="\</svg\>\</div\>\n";
     r+=
-"\<div class=\"tooltip\"\>\<svg id = \"tooltip\" width=<upperBound> height=<upperBound> \>";
+"\<div class=\"tooltip\"\>\<svg id = \"tooltip\" width=<0> height=<0> \>";
     for (IFigure fi<-tooltips) {
          if (g:ifigure(str id, _):=fi) {
             r+= visitFig(g);        
@@ -1129,15 +1129,24 @@ str getEdgeOpt(Edge s) {
           r+="lineInterpolate:\"basis\",";
           }
       if (!isEmpty(m))  {  
-         for (t<-m) {
-           if (t=="lineColor")  {r+="style: \"stroke:<m[t]>;fill:none\",";continue;}
+         for (t<-m) 
+           if (!(t=="lineColor"||t=="lineWidth"))
+           {    
            if (t=="label" && str q:=m[t])  {r+="<t>:\"<q>\",";continue;}
-           r+="<t>:<vl(m[t])>,";
-          
-           }    
+           r+="<t>:<vl(m[t])>,";       
+           }
+         for (t<-m) 
+           if (t=="lineColor"||t=="lineWidth")  {r+="style:\"fill:none"; break;}
+         for (t<-m) 
+           if (t=="lineColor"||t=="lineWidth") {
+               if (t=="lineColor")  {r+=";stroke:<m[t]>";continue;}
+               if (t=="lineWidth")  {r+=";stroke-width:<m[t]>";continue;}
+           }  
+         for (t<-m) 
+           if (t=="lineColor"||t=="lineWidth")  {r+="\","; break;}  
          r = replaceLast(r,",","");
          } 
-         r+="}";         
+         r+="}";      
     return r;
     }
     
@@ -1162,7 +1171,15 @@ str dagreIntersect(Figure s) {
     
 str dagrePoints(Figure f) {
       str r = "function () {";
-      if (q:ngon():=f) {
+      if (ngon():=f) {        
+          if (f.size != <0, 0>) {
+            if (f.width<0) f.width = f.size[0];
+            if (f.height<0) f.height = f.size[1];
+            }
+          if (f.r<0 && f.height>0 &&f.width>0) {
+          int d = min([f.height, f.width]);
+          f.r = (d)/2;
+          }
           num angle = 2 * PI() / f.n;
           lrel[num, num] p  = [<f.r+f.r*cos(i*angle), f.r+f.r*sin(i*angle)>|int i<-[0..f.n]];  
           r+= "return <replaceLast( "[<for(z<-p){> {x:<toInt(z[0])>, y: <toInt(z[1])>},<}>]", ",", "")>";
@@ -1239,7 +1256,7 @@ str addShape(Figure s) {
     }
       
     
- IFigure _graph(str id, Figure f, list[str] ids) {
+ IFigure _graph(str id, Figure f) {
     int width = f.width;
     int height = f.height;
     str begintag =
@@ -1258,7 +1275,7 @@ str addShape(Figure s) {
         '<attrPx("width", width)><attrPx("height", height)>
         '; 
         "
-        , f.width, f.height, 0, 0, f.vshrink, f.hshrink, align, align, getLineWidth(f), getLineColor(f), f.sizeFromParent, true >;
+        , width, height, 0, 0, f.vshrink, f.hshrink, align, align, getLineWidth(f), getLineColor(f), f.sizeFromParent, true >;
        addState(f);
        widgetOrder+= id;
        return ifigure(id, []);
@@ -2610,13 +2627,15 @@ IFigure _translate(Figure f,  bool addSvgTag = false,
         case scatterChart():  return _googlechart("ScatterChart", f.id, f, addSvgTag);
         case areaChart():  return _googlechart("AreaChart", f.id, f, addSvgTag);
         case graph(): {
+              if (f.width<0) f.width = 800;
+              if (f.height<0) f.height = 800;
               Figures figs = [n[1]|n<-f.nodes];
               list[IFigure] ifs = [_translate(q, addSvgTag = true)|q<-figs];
               extraGraphData[f.id]  = (n[0]:getId(i)| <tuple[str, Figure] n, IFigure i> <-zip(f.nodes, ifs));
               IFigure r =
                _overlay("<f.id>", f 
                 , 
-                [_graph("<f.id>_graph", f, [getId(i)|i<-ifs])] 
+                [_graph("<f.id>_graph", f)] 
                 +ifs
                 );
                return r;        
@@ -2728,6 +2747,7 @@ public void _render(Figure fig1, int width = -1, int height = -1,
         clearWidget();
         if (atXY(_, _, _):= fig1 || atX(_,_):=fig1 || atY(_,_):=fig1){
              align = topLeft; 
+             fig1=overlay(figs=[fig1]);
              }  
         Figure h = emptyFigure();
         h.lineWidth = lineWidth<0?1:lineWidth;

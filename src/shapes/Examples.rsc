@@ -654,8 +654,8 @@ void toverlays() = render(buttonInput("overlays", panel = panel(overlays())));
 
 /********************** atXY ********************************/
 
-public Figure at1 = box(fig=atXY(100, 100, box(fillColor="red", size=<50,50>)));
-void tat1(){ ex("at1", at1); }
+public Figure at1 = overlay(figs=[atXY(100, 100, box(fillColor="red", size=<50,50>))]);
+void tat1(){ render(at1); }
 
 public Figure at2 = overlay(align=topLeft,
 						figs= [atXY(100,100, box(fillColor="red", size=<50,50>)),
@@ -912,44 +912,27 @@ void markers(){
 */
 
 /********************* graph ******************************/
-/*
+
+     
 lrel[str,Figure] nodes1 = 
-			     [ <"N0",    ngon(n=5, fig=text("N0"), fillColor="yellow", lineWidth=1)>,
-          		   <"N1" ,   //SCALE(0.5, polygon(points=[<200,10>,<250,190>, <160,210>], fillColor="pink", lineWidth=1))>,
-          		   			//SCALE(0.5, polygon(points=[<100,10>, <40,198>, <190,78>, <10,78>, <160,198>], fillColor="green", lineWidth=4))>,
-          		   			polygon(points=[<70.0,15>, <75.8,32.2>, <93.8,32.2>, <79.4,43>, <84.6,60.2>, <70,50>, <55.4,60.2>, <60.6,43>, <46.2,32.2>, <64.2,32.2>],fillColor="blue", lineWidth=0)>,
-          		   			//box(fig=text("N1"), fillColor="red", lineDashing=[1,1,1,1,1,1], size=<50,50>)>,
-     	    	   <"N2" ,	 ellipse(fig=text("N2"), fillColor="lightblue", size=<80,80>)>
+			     [ <"N0",    ngon(n=5, size=<40, 40> , fig=text("N0"), fillColor="yellow", lineWidth=1)>,
+          		  // <"N1" ,   polygon(points=[<70.0,15>, <75.8,32.2>, <93.8,32.2>, <79.4,43>, <84.6,60.2>, <70,50>, <55.4,60.2>, <60.6,43>, <46.2,32.2>, <64.2,32.2>],fillColor="blue", lineWidth=0)>,
+          		    <"N1" ,   polygon(points=[<x[0]-46.2, x[1]>|x<-[<70.0,15>, <75.8,32.2>, <93.8,32.2>, <79.4,43>, <84.6,60.2>, <70,50>, <55.4,60.2>, <60.6,43>, <46.2,32.2>, <64.2,32.2>]],fillColor="blue", lineWidth=0)>,
+     	    	   <"N2" ,	 
+     	    	    // ellipse(fig=text("N2"), fillColor="lightblue", size=<80,80>)
+     	    	     ngon(n=5, size=<40, 40>,  fig=text("N2"), fillColor="yellow", lineWidth=1)
+     	    	   >
      	  		];
-list[Figure] edges1 = [ edge("N0","N1", "N0-N1", lineWidth=4), 
-						edge("N1","N2", "N1-N2", lineColor="red", lineWidth=3, lineOpacity=0.3), 
-						edge("N2","N0", "N2-N0", lineColor="blue", lineDashing=[4,2,4,2]),
-						edge("N0","N2", "N0-N2", lineColor="yellow", lineDashing=[4,2,4,2])
-					  ];        
+list[Edge] edges1 = [ edge("N0","N1",label="N0-N1", lineWidth=4), 
+						edge("N1","N2", label= "N1-N2", lineColor="red", lineWidth=2), 
+						edge("N2","N0", label= "N2-N0", lineColor="blue"),
+						edge("N0","N2", label= "N0-N2", lineColor="yellow")
+					  ];  
+					  
+Figure graph1() = graph( nodes=nodes1, edges=edges1, size=<400, 400>);
 
-void graph1(){
-	ex("graph1", graph(nodes=nodes1, edges=edges1, layerSep=50));
-}
-
-void graph2(){
-	ex("graph2", graph(nodes=nodes1, edges=edges1, flavor="springGraph", lineColor="black", size=<200,200>));
-}
-
-void graph3(){
-	ex("graph3", hcat(figs= [ graph(nodes=nodes1, edges=edges1),
-							  graph(nodes=nodes1, edges=edges1, flavor="springGraph", size=<200,200>)
-							 ]));
-}
-
-//void graph4(){
-//	ex("graph4", hcat(figs=[ barChart(size=<400,300>, dataset=exampleBarData()),
-//						     graph(nodes=nodes1, edges=edges1),
-//					         lineChart(xAxis=axis(label="Time (s)",    tick=",r"), 
-//							   		   yAxis=axis(label="Volutage (v)", tick=".02f"),	
-//							   		   dataset= sinAndCos(), 
-//							   		   size=<400,400>)
-//					], gap=<50,50>));
-// }
+void tgraph1() = render(graph1());
+					   
 
 lrel[str,Figure] nodes2 =
         [<"A", box(size=<20,20>, fillColor="green")>,
@@ -960,70 +943,23 @@ lrel[str,Figure] nodes2 =
      	 <"F", box(size=<20,20>, fillColor="orange")>
      	];
      	
-list[Figure] edges2 = 
-    	[ edge("A", "B", ""),
-    	  edge("B", "C", ""),
-    	  edge("C", "D", ""),
-    	  edge("D", "E", ""),
-    	  edge("E", "F", ""),
-    	  edge("F", "A", "")
+list[Edge] edges2 = 
+    	[ edge("A", "B"),
+    	  edge("B", "C"),
+    	  edge("C", "D"),
+    	  edge("D", "E"),
+    	  edge("E", "F"),
+    	  edge("F", "A")
     	];
     	
-public void graph5(){ 
-    render("graph5", graph(nodes=nodes2, edges=edges2));
-}
+Figure graph2() = graph( nodes=nodes2, edges=edges2, size=<400, 400>);
 
-public void graph6(){ 
-    render("graph6", graph(nodes=nodes2, edges=edges2,flavor="springGraph", size=<300,300>));
-}
+void tgraph2() = render(graph2());
 
-public void graph7(){ 
-    render("graph7", hcat(figs=[graph(nodes=nodes2, edges=edges2),
-    					   graph(nodes=nodes2, edges=edges2,flavor="springGraph", size=<300,300>)
-    					  ]));
-}
 
-public void graph8(){
+Figure graphs() = hcat(figs=[graph1(), graph2()]);
 
-	Figure b(str label) =  box(fig = text(label), fillColor="whitesmoke", rounded=<5,5>, gap=<5,5>, grow=1.2);
-
-    states = [ 	<"CLOSED", 		ngon(n=6, fig=text("CLOSED"), fillColor="#f77", rounded=<5,5>, gap=<5,5>, grow=1.1)>, 
-    			<"LISTEN", 		b("LISTEN")>,
-    			<"SYN RCVD", 	b("SYN RCVD")>,
-				<"SYN SENT", 	b("SYN SENT")>,
-                <"ESTAB",	 	box(fig=text("ESTAB"), fillColor="#7f7", rounded=<5,5>, gap=<5,5>, grow=1.2)>,
-                <"FINWAIT-1", 	b("FINWAIT-1")>,
-                <"CLOSE WAIT", 	box(fig=text("CLOSE WAIT"), fillColor="whitesmoke", lineDashing=[1,1,1,1],  rounded=<5,5>, gap=<5,5>, grow=1.2)>,
-                <"FINWAIT-2", 	b("FINWAIT-2")>,
-                   
-                <"CLOSING", b("CLOSING")>,
-                <"LAST-ACK", b("LAST-ACK")>,
-                <"TIME WAIT", b("TIME WAIT")>
-                ];
- 	
-    edges = [	edge("CLOSED", 		"LISTEN",  	 "open"),
-    			edge("LISTEN",		"SYN RCVD",  "rcv SYN"),
-    			edge("LISTEN",		"SYN SENT",  "send"),
-    			edge("LISTEN",		"CLOSED",    "close"),
-    			edge("SYN RCVD", 	"FINWAIT-1", "close"),
-    			edge("SYN RCVD", 	"ESTAB",     "rcv ACK of SYN"),
-    			edge("SYN SENT",   	"SYN RCVD",  "rcv SYN"),
-   				edge("SYN SENT",   	"ESTAB",     "rcv SYN, ACK"),
-    			edge("SYN SENT",   	"CLOSED",    "close"),
-    			edge("ESTAB", 		"FINWAIT-1", "close"),
-    			edge("ESTAB", 		"CLOSE WAIT", "rcv FIN"),
-    			edge("FINWAIT-1",  	"FINWAIT-2",  "rcv ACK of FIN"),
-    			edge("FINWAIT-1",  	"CLOSING",    "rcv FIN"),
-    			edge("CLOSE WAIT", 	"LAST-ACK",  "close"),
-    			edge("FINWAIT-2",  	"TIME WAIT",  "rcv FIN"),
-    			edge("CLOSING",    	"TIME WAIT",  "rcv ACK of FIN"),
-    			edge("LAST-ACK",   	"CLOSED",     "rcv ACK of FIN", lineColor="green"),
-    			edge("TIME WAIT",  	"CLOSED",     "timeout=2MSL")
-  			];
-  			
-  	render("graph8", graph(nodes=states, edges=edges));
-}
-*/
+    	
 /************** text *****************/
 
 public Figure text0 = text("Hello");
@@ -1120,6 +1056,7 @@ Figure examples() {
     , <"tooltips", tooltips()>
     ,<"ats", ats()>
     ,<"rotates", rotates()>
+    ,<"graphs", graphs()>
      ]
     ;
     Figures buttons = [buttonInput(q[0],  size=<100, 30>, align = topLeft, panel = panel(q[1]))|q<-items];
