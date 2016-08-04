@@ -134,15 +134,15 @@ Figure schoolPlot() {
         scaleX=<<0,10>,<0,400>>, scaleY=<<0,10>,<400,0>>, width = 400, height = 400, 
         lineColor = "blue")
          , 
-       circle(r=40, cx = 200, cy = 200, fillColor = "yellow"
+       atXY(160, 160, circle(r=40,  fillColor = "yellow"
         ,lineWidth = 10, lineColor = "red", lineOpacity=0.5, fillOpacity=0.5, fig = text("Hello")
-        )
+        ))
         ,
-        atXY(50, 50, circle(lineWidth=10, lineColor= "red", fillColor = "none",  padding=<0, 0, 0, 0>, fig= atXY(0,0, 
+       atXY(50, 50, circle(lineWidth=10, lineColor= "red", fillColor = "none",  padding=<0, 0, 0, 0>, fig= atXY(0,0, 
              box(width=50, height = 50, lineColor="grey", fillColor = "antiquewhite")
-             )))
+            )))
         ,atXY(250, 250, circle(lineWidth=10, fillColor="none", lineColor="brown", padding=<0, 0, 0, 0>
-        , fig=ngon(n=7, r=40, lineWidth = 10, lineColor = "grey", fillColor = "none")))
+       , fig=ngon(n=7, r=40, lineWidth = 10, lineColor = "grey", fillColor = "none")))
         ])
         ;
      } 

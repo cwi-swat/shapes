@@ -121,8 +121,8 @@ void tboxes() = render(buttonInput("boxes", panel = panel(boxes())));
 
 // ellipse
 
-public Figure ellipse1 = ellipse(cx=100, cy=100, rx=100, ry=75);
-void tellipse1(){ ex("ellipse1", ellipse1); }
+public Figure ellipse1 = ellipse(cx=100, cy=100, rx=100, ry=75, fillColor="green");
+void tellipse1(){ ex("ellipse1", vcat(figs=[ellipse1])); }
 
 public Figure ellipse2 = ellipse(cx=100, cy=100, rx=100, ry=75, fillColor="red");
 void tellipse2(){ ex("ellipse2", ellipse2); }
@@ -139,8 +139,8 @@ void tellipse5(){ ex("ellipse5", ellipse5); }
 public Figure ellipse6 = box(lineColor="red", lineWidth=15, fig=ellipse(rx=100, ry=75, lineWidth=10, lineColor="silver", lineOpacity=0.5));
 void tellipse6(){ ex("ellipse6", ellipse6); }
 
-Figure ellipses() = vcat(figs=[ellipse1, ellipse2, ellipse3, ellipse4, ellipse5, ellipse6]);
-void tellipses() = render(buttonInput("boxes", panel = panel(ellipses())));
+Figure ellipses() = vcat(figs=[ellipse1, ellipse2, ellipse3 ,ellipse4, ellipse5, ellipse6]);
+void tellipses() = render(buttonInput("ellipses", panel = panel(ellipses())));
 
 // circle
 
@@ -164,7 +164,7 @@ public Figure circle6 = box(lineColor="red", lineWidth=15, fig=circle(r=100, lin
 void tcircle6(){ ex("circle6", circle6); }
 
 Figure circles() = vcat(figs=[circle1, circle2, circle3, circle4, circle5, circle6]);
-void tcircles() = render(buttonInput("boxes", panel = panel(circles())));
+void tcircles() = render(buttonInput("circles", panel = panel(circles())));
 
 // ngon
 
@@ -654,7 +654,7 @@ void toverlays() = render(buttonInput("overlays", panel = panel(overlays())));
 
 /********************** atXY ********************************/
 
-public Figure at1 = overlay(figs=[atXY(100, 100, box(fillColor="red", size=<50,50>))]);
+public Figure at1 = atXY(100, 100, box(fillColor="red", size=<50,50>));
 void tat1(){ render(at1); }
 
 public Figure at2 = overlay(align=topLeft,
@@ -925,7 +925,7 @@ lrel[str,Figure] nodes1 =
      	  		];
 list[Edge] edges1 = [ edge("N0","N1",label="N0-N1", lineWidth=4), 
 						edge("N1","N2", label= "N1-N2", lineColor="red", lineWidth=2), 
-						edge("N2","N0", label= "N2-N0", lineColor="blue"),
+						edge("N2","N0", label= "N2-N0", lineColor="blue", lineDashing=[1,2]),
 						edge("N0","N2", label= "N0-N2", lineColor="yellow")
 					  ];  
 					  
@@ -1047,6 +1047,7 @@ Figure examples() {
      [
      <"boxes",boxes()>
      ,<"ellipses", ellipses()>
+     ,<"circles", circles()>
      ,<"ngons", ngons()>
      ,<"polygons", polygons()>
      ,<"overlays",overlays()>
@@ -1066,8 +1067,8 @@ Figure examples() {
 
 void allExamples(){
     render(examples()
-    // renderShow(examples(), javaLoc=|file:///ufs/bertl/jdk1.8.0_77|
-    // , size=<2500, 2500>
+   //renderShow(examples(), javaLoc=|file:///ufs/bertl/jdk1.8.0_77|
+   //  , size=<2500, 2500>
     );
 }
 
