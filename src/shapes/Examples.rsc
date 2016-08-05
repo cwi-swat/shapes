@@ -121,7 +121,7 @@ void tboxes() = render(buttonInput("boxes", panel = panel(boxes())));
 
 // ellipse
 
-public Figure ellipse1 = ellipse(cx=100, cy=100, rx=100, ry=75, fillColor="green");
+public Figure ellipse1 = atXY(150, 150, ellipse(cx=100, cy=100, rx=100, ry=75, fillColor="green"));
 void tellipse1(){ ex("ellipse1", vcat(figs=[ellipse1])); }
 
 public Figure ellipse2 = ellipse(cx=100, cy=100, rx=100, ry=75, fillColor="red");
@@ -139,8 +139,12 @@ void tellipse5(){ ex("ellipse5", ellipse5); }
 public Figure ellipse6 = box(lineColor="red", lineWidth=15, fig=ellipse(rx=100, ry=75, lineWidth=10, lineColor="silver", lineOpacity=0.5));
 void tellipse6(){ ex("ellipse6", ellipse6); }
 
-Figure ellipses() = vcat(figs=[ellipse1, ellipse2, ellipse3 ,ellipse4, ellipse5, ellipse6]);
+Figure ellipses() = vcat(borderWidth=2, figs=[ellipse1, ellipse2, ellipse3 ,ellipse4, ellipse5, ellipse6]);
 void tellipses() = render(buttonInput("ellipses", panel = panel(ellipses())));
+
+public void fellipses(loc l) = writeFile(l, toHtmlString(
+    ellipses()
+ ));
 
 // circle
 
@@ -1066,9 +1070,9 @@ Figure examples() {
  
 
 void allExamples(){
-    render(examples()
-   //renderShow(examples(), javaLoc=|file:///ufs/bertl/jdk1.8.0_77|
-   //  , size=<2500, 2500>
+   //render(examples()
+   renderShow(examples(), javaLoc=|file:///ufs/bertl/jdk1.8.0_77|
+    , screenWidth=1200, screenHeight = 1200
     );
 }
 

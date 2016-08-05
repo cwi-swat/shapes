@@ -1,5 +1,5 @@
 <project name="MyProject" default="create_run_jar" basedir=".">
-<property name="src" location="src"/>
+<property name="src" location="."/>
 <property name="build" location="bin"/>
 <property name="dist" location="lib"/>
 <target name="create_run_jar">

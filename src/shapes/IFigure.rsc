@@ -1553,11 +1553,6 @@ num cyL(Figure f) =  f.cy<0?
                           if (f.height<0 && f.r>=0) f.height = round(f.r*2+y);                 
                           }
           } 
-        if (f.cx>=0 || f.cy>=0) {
-           num x = f.at[0]+f.cx-((ellipse():=f)?f.rx:f.r)-lw/2;
-           num y=  f.at[1]+f.cy-((ellipse():=f)?f.ry:f.r)-lw/2;
-           f.at = <x, y>;
-           }
        str begintag =
          "\<svg  xmlns = \'http://www.w3.org/2000/svg\' id=\"<id>_svg\"\><beginScale(f)><beginRotate(f)>\<rect id=\"<id>_rect\"/\> \<<tg> id=\"<id>\"/\> 
          '<beginTag("<id>", fo, fig, align, lw)>
@@ -2302,7 +2297,8 @@ IFigure _grid(str id, Figure f,  bool addSvgTag, list[list[IFigure]] figArray=[[
     // println(align);
     begintag +="\<td  id=\"<id>\" <vAlign(align)> <hAlign(align)>\>";
     bool addSvgTag = (getAtX(fig1)!=0 ||  getAtY(fig1)!=0)&&f.width<0 &&f.height<0;
-    // bool addSvgTag = false;
+    //println("HELP: <getAtX(fig1)>  <getAtY(fig1)>");
+   // bool addSvgTag = false;
     if (addSvgTag) {
           begintag+=
          "\<svg id=\"<id>_svg\"\> 
@@ -2328,6 +2324,7 @@ IFigure _grid(str id, Figure f,  bool addSvgTag, list[list[IFigure]] figArray=[[
 	    '        var x =  <getAtX(fig1)>;
 	    '        var y =  <getAtY(fig1)>;
 	    '        d3.select(\"#<id>_svg\")<attr1("width", "w+x")><attr1("height", "h+y")>;
+	     '       d3.select(\"#<id>_outer_fo\")<attr1("width", "w")><attr1("height", "h")>;
 	    '      }
 	    '<}>
         ", f.width, f.height, getAtX(f), getAtY(f), 0, 0, align, align, getLineWidth(f), getLineColor(f)

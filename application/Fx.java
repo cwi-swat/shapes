@@ -31,7 +31,7 @@ public class Fx extends Application {
 	public void start(Stage primaryStage) {
 		primaryStage.setMinWidth(width);
 		primaryStage.setMinHeight(height);
-		// System.out.println("start:" + fname + ":" + width);
+		// System.err.println("start:" + fname + ":" + width);
 		WebView wb = new WebView();
 		WebEngine webEngine = wb.getEngine();
 		Scene scene = new Scene(wb, width, height);
@@ -56,9 +56,8 @@ public class Fx extends Application {
 			}
 		});
         webEngine.load(fname);
-		//System.out.println("before end");
 		primaryStage.setScene(scene);
-		System.out.println("end");
+		System.err.println("end");
 		primaryStage.show();
 
 	}
