@@ -12,7 +12,7 @@ import Prelude;
 import lang::csv::IO;
 import shapes::Figure;
 import shapes::FigureServer;
-import experiments::vis2::sandbox::Render;
+import shapes::Render;
 
 loc location = |project://shapes/src/data/Steden.csv|;
 

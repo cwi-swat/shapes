@@ -10,7 +10,7 @@ module shapes::Nederland
 
 import shapes::Figure;
 import shapes::FigureServer; 
-import experiments::vis2::sandbox::Render;
+import shapes::Render;
 
 import Prelude;
 import util::Math;

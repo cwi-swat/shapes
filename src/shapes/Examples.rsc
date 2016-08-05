@@ -120,8 +120,15 @@ void tboxes() = render(buttonInput("boxes", panel = panel(boxes())));
 
 
 // ellipse
+Figure shift(Figure f, int x, int y, real fillOpacity) {
+    //f.fillOpacity = fillOpacity;
+    // f.lineOpacity = fillOpacity;
+    f.lineWidth = 0;
+    f.fillColor= "lightgrey";
+    return atXY(10*x, 10*y, f);
+    }
 
-public Figure ellipse1 = atXY(150, 150, ellipse(cx=100, cy=100, rx=100, ry=75, fillColor="green"));
+public Figure ellipse1 = atXY(50, 50, ellipse(cx=100, cy=100, rx=100, ry=75, fillColor="green"));
 void tellipse1(){ ex("ellipse1", vcat(figs=[ellipse1])); }
 
 public Figure ellipse2 = ellipse(cx=100, cy=100, rx=100, ry=75, fillColor="red");
@@ -138,6 +145,13 @@ void tellipse5(){ ex("ellipse5", ellipse5); }
 
 public Figure ellipse6 = box(lineColor="red", lineWidth=15, fig=ellipse(rx=100, ry=75, lineWidth=10, lineColor="silver", lineOpacity=0.5));
 void tellipse6(){ ex("ellipse6", ellipse6); }
+
+public Figure ellipse7() {
+   Figure f = ellipse(cx=100, cy=75, rx=100, ry=75, fillColor="blue");
+   Figures fs = [shift(f,i, i, 0.0)|i<-[1..2]];
+   return overlay(figs=fs+[f]);
+}
+void tellipse7(){ ex("ellipse7", ellipse7()); }
 
 Figure ellipses() = vcat(borderWidth=2, figs=[ellipse1, ellipse2, ellipse3 ,ellipse4, ellipse5, ellipse6]);
 void tellipses() = render(buttonInput("ellipses", panel = panel(ellipses())));

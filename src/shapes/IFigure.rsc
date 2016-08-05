@@ -17,10 +17,9 @@ import util::Math;
 
 import shapes::Figure;
 import shapes::Tree;
-//import shapes::Utilities;       // <== does not exist anymore
-
 
 private loc base = |project://shapes/src/shapes|;
+
 
 // The random accessable data element by key id belonging to a widget, like _box, _circle, _hcat. 
 
@@ -496,17 +495,8 @@ void callCallback(str e, str n, str v) {
        a.\value = v;
        _setProperty(n, a);
        old[widget[n].seq].property = a;
-       }
-       // value z = f.tooltip; 
+       } 
       invokeF(e, n, v);
-      /*
-      if (Figure g := z && g !=emptyFigure()) {
-          // println("OK");
-         if (e=="mouseenter") {visible("<f.id>_tooltip"); return;}
-         else
-          if (e=="mouseleave") {hide("<f.id>_tooltip"); return;} 
-      }
-      */
      }
     if (!isEmpty(labval)) {   
        _setPrompt(<labval[0][1], labval[0][2]>); 
