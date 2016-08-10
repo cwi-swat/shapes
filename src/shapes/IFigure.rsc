@@ -16,8 +16,8 @@ import lang::json::IO;
 import util::Math;
 
 import shapes::Figure;
-import experiments::vis2::sandbox::Tree;
-import experiments::vis2::sandbox::Utilities;
+import shapes::Tree;
+import shapes::Utilities;       // <== does not exist anymore
 
 
 private loc base = |project://shapes/src/shapes|;
