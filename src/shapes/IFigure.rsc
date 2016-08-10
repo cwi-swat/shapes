@@ -17,7 +17,7 @@ import util::Math;
 
 import shapes::Figure;
 import shapes::Tree;
-import shapes::Utilities;       // <== does not exist anymore
+//import shapes::Utilities;       // <== does not exist anymore
 
 
 private loc base = |project://shapes/src/shapes|;
