@@ -1071,7 +1071,7 @@ Figure examples() {
 
 void allExamples(){
    //render(examples()
-   renderShow(examples(), javaLoc=|file:///ufs/bertl/jdk1.8.0_77|
+   renderShow(examples()//, javaLoc=|file:///ufs/bertl/jdk1.8.0_77|
     , screenWidth=1200, screenHeight = 1200
     );
 }
