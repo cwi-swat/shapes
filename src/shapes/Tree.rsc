@@ -276,12 +276,12 @@ TreeNode doShapeTree(TreeNode t, int height, int yPosition, int ySeparation, int
        }  
        if (!isEmpty(outline)) {
            int centre = cityblock?roundX(outline):last(outline).x/2;
-           for (int i<-[0..size(outline)]) {         
-              outline[i].x -= centre;         
+           for (int i1<-[0..size(outline)]) {         
+              outline[i1].x -= centre;         
               }
            // println("Check: <yPosition+t.height>\<<z[t.left].left.offset[z[t.left].left.yPosition]>");
-           for (int i<-[yPosition,yPosition+1..z[t.left].left.yPosition+1]) z[t.left].left.offset[i] += centre;
-           for (int i<-[yPosition,yPosition+1..z[t.right].right.yPosition+1]) z[t.right].right.offset[i] -= centre;
+           for (int i2<-[yPosition,yPosition+1..z[t.left].left.yPosition+1]) z[t.left].left.offset[i2] += centre;
+           for (int i3<-[yPosition,yPosition+1..z[t.right].right.yPosition+1]) z[t.right].right.offset[i3] -= centre;
            t.branches = outline;
            } 
       }
