@@ -1,4 +1,4 @@
-module shapes::Poisson
+module shapes::examples::Poisson
 import Prelude;
 import shapes::FigureServer;
 import shapes::Figure;

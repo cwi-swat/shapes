@@ -1,4 +1,4 @@
-module shapes::Shapes
+module shapes::examples::Shapes
 import shapes::FigureServer;
 import shapes::Figure;
 import shapes::Render;

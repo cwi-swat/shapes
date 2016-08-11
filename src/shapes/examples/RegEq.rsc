@@ -6,7 +6,7 @@
   http://www.eclipse.org/legal/epl-v10.html
 }
 @contributor{Bert Lisser - Bert.Lisser@cwi.nl (CWI)}
-module shapes::RegEq
+module shapes::examples::RegEq
 import Prelude;
 import util::Math;
 import analysis::statistics::SimpleRegression;

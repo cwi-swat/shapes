@@ -1,7 +1,7 @@
-module shapes::IDemo
+module shapes::examples::IDemo
 import shapes::FigureServer;
 import shapes::Figure;
-import shapes::Steden;
+import shapes::examples::Steden;
 import Prelude;
 import util::Math;
 import shapes::Render;

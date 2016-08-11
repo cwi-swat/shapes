@@ -375,15 +375,12 @@ data ViewWindow(int max = -1, int min = -1) = viewWindow();
 data Gridlines(str color = "", int count =-1) = gridlines();
 
 data Series (
-    int b = 0
-    /*
     str color ="",
     str curveType = "",
     int lineWidth = -1,
     str pointShape = "",
     int pointSize = -1,
     str \type=""
-    */
     ) = series();
     
 data Bar (value groupWidth = "") = bar();
@@ -488,7 +485,6 @@ data ChartOptions (str title = "",
             
 
 ChartOptions updateOptions (list[Chart] charts, ChartOptions options) {
-    /*
     options.series_ = [];
     for (c<-charts) {
         Series s = series();
@@ -506,7 +502,6 @@ ChartOptions updateOptions (list[Chart] charts, ChartOptions options) {
         if (c.pointSize>=0) s.pointSize = c.pointSize;
         options.series_ += [s];
         }
-        */
     return options;
     }   
 

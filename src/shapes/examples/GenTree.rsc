@@ -1,4 +1,4 @@
-module shapes::GenTree
+module shapes::examples::GenTree
 import Prelude;
 import util::Math;
 import shapes::FigureServer;

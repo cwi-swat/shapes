@@ -6,7 +6,7 @@
   http://www.eclipse.org/legal/epl-v10.html
 }
 @contributor{Bert Lisser - Bert.Lisser@cwi.nl (CWI)}
-module shapes::Nederland
+module shapes::examples::Nederland
 
 import shapes::Figure;
 import shapes::FigureServer; 
@@ -20,7 +20,7 @@ void ex(str title, Figure f){
 	render(f);
 }
 
-loc location = |project://rascal/src/org/rascalmpl/library/experiments/vis2/data/Nederland.csv|;
+loc location = |project://shapes/data/Nederland.csv|;
 
 
 alias Record = tuple[str range, 
@@ -71,7 +71,7 @@ public Figure nederland(int idx, int width = 400, int height = 400) {
                 title = d[k]
            		,width=width
                 , height=height
-                , legend = legend(position="left")
+                , legend_ = legend(position="left")
                 , is3D = true
                 );
                 

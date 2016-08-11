@@ -1,4 +1,4 @@
-module shapes::Pico
+module shapes::examples::Pico
 import Prelude;
 import ParseTree;
 import demo::lang::Pico::Load;

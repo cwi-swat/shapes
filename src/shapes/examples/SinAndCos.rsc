@@ -6,7 +6,7 @@
   http://www.eclipse.org/legal/epl-v10.html
 }
 @contributor{Bert Lisser - Bert.Lisser@cwi.nl (CWI)}
-module shapes::SinAndCos
+module shapes::examples::SinAndCos
 import shapes::Figure; 
 import util::Math;
 import Prelude;

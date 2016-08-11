@@ -493,11 +493,8 @@ function _adjust(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y, width,
 	// toId, fromId, hshrink, vshrink, toLw, n, angle, x , y
 	var to = d3.select("#" + toId);
 	toLw = corner(n, toLw);
-	var from = d3.select("#" + fromId);
-	var fromLw = parseInt(from.style("stroke-width"));
-	fromLw = corner(nPoints(from), fromLw);
-	width = width - fromLw - toLw - x;
-	height = height - fromLw - toLw - y;
+	width = width -  toLw - x;
+	height = height - toLw - y;
 	var w = width * hshrink;
 	var h = height * vshrink;
 	// alert("adjust1:"+ to.node().nodeName+" "+width+" "+height+" "+w+" "+h);
@@ -572,7 +569,7 @@ function _adjust(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y, width,
 	     d3.select("#" + toId + "_svg").attr("width", w + toLw + x);
 	}
 	if (invalidH) {
-		 // d3.select("#" + fromId + "_"+toId).style("height", height);
+		 d3.select("#" + fromId + "_"+toId).style("height", height);
 	     to.attr("h", h - toLw).style("height", h - toLw);
 	     d3.select("#" + toId).attr("h", h - toLw);
 	     d3.select("#" + toId + "_fo").attr("height", h - toLw);
@@ -876,7 +873,7 @@ function adjustTableW(clients, from, lw, hpad, vpad, hgap, vgap) {
 	var height = c.attr("h");
 	if (invalid(width) || invalid(height))
 		return;
-	width = parseInt(width) - hgap * clients.length;
+	width = parseInt(width) - hgap * clients.length-lw;
 	var aUndefW = clients.filter(undefW);
 	var sDefW = sumWidth(clients.filter(defW));
 	var nW = aUndefW.length;
@@ -899,7 +896,7 @@ function adjustTableH(clients, from, lw, hpad, vpad, hgap, vgap) {
 	// alert("AdjustTableH:"+from+":"+width);
 	if (invalid(width) || invalid(height))
 		return;
-	height = parseInt(height) - vgap * clients.length;
+	height = parseInt(height) - vgap * clients.length-lw;
 	var aUndefH = clients.filter(undefH);
 	// alert(aUndefH.length);
 	var aUndefWH = clients.filter(undefWH);
@@ -948,9 +945,9 @@ function adjustTableWH(clients, id1, lw, hpad, vpad, hgap, vgap) {
 	var height = c.attr("h");
 	if (invalid(width) || invalid(height))
 		return;
-	width = parseInt(width) - hgap * clients.length;
+	width = parseInt(width) - hgap * clients.length-lw;
 	;
-	height = parseInt(height) - vgap * clients.length;
+	height = parseInt(height) - vgap * clients.length-lw;
 	clients1 = transpose(clients);
 	var aUndefW = clients.map(function(i) {
 		return i.filter(undefW);
@@ -1007,6 +1004,11 @@ function fromOuterToInner(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y) 
 		width = document.getElementById(fromId).getBoundingClientRect().width;
 		height = document.getElementById(fromId).getBoundingClientRect().height;
 	}
+	var from = d3.select("#" + fromId);
+	var fromLw = parseInt(from.style("stroke-width"));
+	fromLw = corner(nPoints(from), fromLw);
+	width-=fromLw;
+	height-=fromLw;
 	_adjust(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y, width, height);
 }
 

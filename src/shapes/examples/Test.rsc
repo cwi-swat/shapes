@@ -1,7 +1,7 @@
-module shapes::Test
+module shapes::examples::Test
 import shapes::FigureServer;
 import shapes::Figure;
-import shapes::Shortcuts;
+import shapes::examples::Shortcuts;
 import shapes::Render;
 import util::Math;
 
@@ -30,7 +30,7 @@ public void standard() {
  Figure tests(  ) {
      return vcat(borderWidth=4, vgap=4, figs= mapper(
         [
-         box(size=<100, 100>, fillColor ="green")
+        box(size=<100, 100>, fillColor ="green")
         ,box(fig=text("Hallo", fontSize=20, fontColor="darkred"), grow = 1.7, fillColor = "antiquewhite")
         ,box(fillColor="antiquewhite", lineWidth = 8, lineColor="blue", align = centerMid, grow  =1.0
               , fig = box( size=<200, 200>, fillColor = "gold", lineWidth = 8, lineColor = "red"))
@@ -43,13 +43,13 @@ public void standard() {
         ,hcat(figs=[box(size=<30, 30>, fillColor="blue"), box(size=<50, 50>, fillColor="yellow"), box(size=<70, 70>, fillColor=  "red")],align= topLeft)
         ,hcat(figs=[box(size=<30, 30>, fillColor="blue"), box(size=<50, 50>, fillColor="yellow"), box(size=<70, 70>, fillColor=  "red")],align= centerMid)
         ,hcat(figs=[box(size=<30, 30>, fillColor="blue"), box(size=<50, 50>, fillColor="yellow"), box(size=<70, 70>, fillColor=  "red")],align= bottomRight)
-        ,hcat(width=200, height=70, figs= [box(shrink= 1.0, fillColor= "blue"), box(shrink= 0.5, fillColor= "yellow"), box(shrink=1.0, fillColor= "red")], align = bottomLeft)
+        ,hcat(lineWidth=1, width=200, height=70, figs= [box(shrink= 1.0, fillColor= "blue"), box(shrink= 0.5, fillColor= "yellow"), box(shrink=1.0, fillColor= "red")], align = bottomLeft)
         ,vcat(width=200, height=70, figs= [box(shrink= 1.0, fillColor= "blue"), box(shrink= 0.5, fillColor= "yellow"), box(shrink=1.0, fillColor= "red")], align = bottomLeft)
         ,vcat(figs=[text("a",fontSize=14, fontColor="blue"), text("bb",fontSize=14, fontColor="blue"),text("ccc",fontSize=14, fontColor="blue")], align = topRight)
         ,grid(width=200, height=70, figArray= [[box(shrink= 0.5, fillColor="blue")], [box(shrink=0.3, fillColor="yellow"), box(shrink=0.5, fillColor="red")]], align=bottomLeft)
         ,grid(width=200, height=70, figArray= [[box(shrink= 0.5, fillColor="blue")], [box(shrink=0.3, fillColor="yellow"), box(shrink=0.5, fillColor="red")]], align=centerMid)
         ,graph(width=200, height=200, nodes=[<"a", box(fig=text("aap",fontSize=14, fontColor="blue"), grow=1.6, fillColor="beige")>
-                                           , <"b", box(fig=text("noot",fontSize=14, fontColor="blue"), grow=1.6, fillColor="beige")>]
+                                          , <"b", box(fig=text("noot",fontSize=14, fontColor="blue"), grow=1.6, fillColor="beige")>]
                                      ,edges=[edge("a","b")])
         ], stack)
         , resizable=true);
@@ -230,7 +230,7 @@ Figure tetris() =
   
 void ttetris() = render(tetris());   
 
-loc location = |project://shapes/src/data/tutor.html|;  
+loc location = |project://shapes/data/tutor.html|;  
 
 
 Figure tut() =

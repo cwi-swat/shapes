@@ -6,7 +6,7 @@
   http://www.eclipse.org/legal/epl-v10.html
 }
 @contributor{Bert Lisser - Bert.Lisser@cwi.nl (CWI)}
-module shapes::Steden
+module shapes::examples::Steden
 
 import Prelude;
 import lang::csv::IO;
@@ -14,7 +14,7 @@ import shapes::Figure;
 import shapes::FigureServer;
 import shapes::Render;
 
-loc location = |project://shapes/src/data/Steden.csv|;
+loc location = |project://shapes/data/Steden.csv|;
 
 public list[Chart] exampleSteden() {
    lrel[str name , int p2013, int p2012 , int ext] v = 

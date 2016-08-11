@@ -1,4 +1,4 @@
-module shapes::Shortcuts
+module shapes::examples::Shortcuts
 import shapes::FigureServer;
 import shapes::Figure;
 import shapes::Render;

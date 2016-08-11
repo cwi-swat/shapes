@@ -7,14 +7,14 @@
 }
 @contributor{Bert Lisser - Bert.Lisser@cwi.nl (CWI)}
 @contributor{Paul Klint - Paul.Klint@cwi.nl - CWI}
-module shapes::Demo
+module shapes::examples::Demo
 import shapes::FigureServer;
 import shapes::Figure;
-import shapes::Steden;
-import shapes::SinAndCos;
-import shapes::Graph;
-import shapes::Flower;
-import shapes::Shapes;
+import shapes::examples::Steden;
+import shapes::examples::SinAndCos;
+import shapes::examples::Graph;
+import shapes::examples::Flower;
+import shapes::examples::Shapes;
 import shapes::Render;
 import util::Math;
 import Prelude;
