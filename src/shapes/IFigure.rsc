@@ -17,8 +17,9 @@ import util::Math;
 
 import shapes::Figure;
 import shapes::Tree;
+import util::Reflective;
 
-private loc base = |project://shapes/src/shapes|;
+private loc base = getModuleLocation("shapes::Figure").parent;
 
 
 // The random accessable data element by key id belonging to a widget, like _box, _circle, _hcat. 
@@ -576,10 +577,13 @@ str extraQuote(str s) = "\"<s>\"";
 IFigure  _d3Pack(str id, Figure f, str json) {
      str begintag= beginTag(id, f.align);
      str endtag = endTag();
+     int width = f.width<0?1200:f.width;
+     int height = f.height<0?800:f.height;
      str lineColor = isEmpty(f.lineColor)?f.fillNode:f.lineColor;
      // println(f.diameter);
      widget[id] = <null, seq, id, begintag, endtag,
      "
+     'd3.select(\"#<id>\").attr(\"w\", <width>).attr(\"h\", <height>);
      'packDraw(\"<id>_td\", <json>, <extraQuote(f.fillNode)>, <extraQuote(f.fillLeaf)>, <f.fillOpacityNode>, <f.fillOpacityLeaf>,
      <extraQuote(lineColor)>, <f.lineWidth<0?1:f.lineWidth>, <f.diameter>, <f.inTooltip>);
      ",  f.width, f.height, 0, 0, 1, 1, f.align, f.cellAlign,  1, "", false, false >;
@@ -594,6 +598,7 @@ IFigure  _d3Treemap(str id, Figure f, str json) {
      int height = f.height<0?800:f.height;
      widget[id] = <null, seq, id, begintag, endtag,
      "
+     'd3.select(\"#<id>\").attr(\"w\", <width>).attr(\"h\", <height>);
      'treemapDraw(\"<id>_td\", <json>, <width>, <height>, \"<f.fillColor>\", <f.inTooltip>);
      ",  f.width, f.height, 0, 0, 1, 1, f.align, f.cellAlign,  1, "", false, false >;
      widgetOrder+= id;  
@@ -2121,9 +2126,9 @@ IFigure _hcat(str id, Figure f, bool addSvgTag, IFigure fig1...) {
         '<style("stroke-width",getLineWidth(f))>
         '<style("visibility", getVisibility(f))>
         '<attr("pointer-events","none")>
-        '<_padding(f.padding)>
-        ; 
-        'adjustTable(\"<id>\", <figCalls(fig1)>);      
+        '<_padding(f.padding)>;
+        'adjustTable(\"<id>\", <figCalls(fig1)>)    
+        ;   
         "
         , width, height, getAtX(f), getAtY(f), f.hshrink, f.vshrink, f.align, f.cellAlign,  getLineWidth(f), getLineColor(f)
         , f.sizeFromParent, false >;

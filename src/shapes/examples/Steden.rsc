@@ -59,13 +59,15 @@ public Figure steden(int width = 400, int height = 400, bool tooltip = false) {
    }
    
  public Figure steden2(bool tooltip= false) {return 
-                          hcat(hgap=5, figs=[
+                          hcat( hgap=5,  figs=[
                           vcat(
                           figs=[box(fig=text("Population"), grow=1.2, fillColor="antiquewhite")
+                              // ,box(size=<200, 200>)
                                ,d3Treemap(d = dddSteden(1), size=<200, 200>, fillColor="lightskyblue", inTooltip = tooltip)
                                ]),
                           vcat(
                           figs=[box(fig=text("Extend"), grow=1.2, fillColor="antiquewhite")
+                              //  ,box(size=<200, 200>)
                                ,d3Treemap(d = dddSteden(3), size=<200, 200>, fillColor="lightpink", inTooltip = tooltip)
                                ])
                           ]);
@@ -93,11 +95,21 @@ public Figure steden3(bool tooltip=false) {return
    )); 
    
  public void tsteden2() {
-       render(steden2());             
+       render(
+       grid(size=<800, 800>, figArray=[
+       //hcat(size=<800, 800>, figs=
+          [steden2()]
+       //)
+       ])
+      );             
    }
    
   public void tsteden3() {
-       render(steden3());             
+       render(
+       grid(size=<800, 800>, figArray=[
+          [steden3()]
+       ])
+       );             
    }
    
 public void fsteden2(loc l) = writeFile(l, toHtmlString(

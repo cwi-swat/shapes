@@ -411,7 +411,7 @@ function fromInnerToOuterFigure(f, id1, toLw, hpad, vpad) {
 	if (from.node().nodeName == "TABLE") {
 		from.style("max-width", width).style("max-height", height);
 	}
-	width = width * f.hgrow + hpad + f.x + fromLw + toLw
+	width = width * f.hgrow + hpad + f.x + fromLw + toLw;
 	height = height * f.vgrow + vpad + f.y + fromLw + toLw;
 
 	switch (to.node().nodeName) {
@@ -459,7 +459,7 @@ function fromInnerToOuterFigure(f, id1, toLw, hpad, vpad) {
 	d3.select("#" + f.id + "_fo_table").attr("w", width - f.x - toLw).attr("h",
 			height - f.y - toLw);
 	d3.select("#" + f.id + "_fo_table").style("width", width - f.x - toLw)
-			.style("height", height - f.y - toLw);
+		.style("height", height - f.y - toLw);
 	d3.select("#" + f.id + "_fo").attr("width", width - f.x - toLw).attr(
 			"height", height - f.y - toLw);
 	d3.select("#" + f.id + "_svg").attr("width", width + toLw).attr("height",
@@ -495,8 +495,8 @@ function _adjust(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y, width,
 	toLw = corner(n, toLw);
 	width = width -  toLw - x;
 	height = height - toLw - y;
-	var w = width * hshrink;
-	var h = height * vshrink;
+	var w = Math.ceil(width * hshrink);
+	var h = Math.ceil(height * vshrink);
 	// alert("adjust1:"+ to.node().nodeName+" "+width+" "+height+" "+w+" "+h);
 	
 	var  invalidW = invalid(to.attr("width"))&&invalid(to.attr("w"));
