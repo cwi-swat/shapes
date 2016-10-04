@@ -11,16 +11,14 @@
 module shapes::IFigure
 import Prelude;
 import util::Webserver;
-
 import lang::json::IO;
 import util::Math;
 
 import shapes::Figure;
 import shapes::Tree;
 import util::Reflective;
-
+ 
 private loc base = getModuleLocation("shapes::Figure").parent;
-
 
 // The random accessable data element by key id belonging to a widget, like _box, _circle, _hcat. 
 
@@ -389,7 +387,7 @@ str getIntro() {
 	}
 
 
-Response page(get(), /^\/$/, value _) { 
+Response page(get(/^\/$/)) { 
 	return response(getIntro());
 }
 
@@ -504,40 +502,42 @@ void callCallback(str e, str n, str v) {
        return; 
        } 
    }
-Response page(post(), /^\/getValue\/<ev:[a-zA-Z0-9_]+>\/<name:[a-zA-Z0-9_]+>\/<v:.*>/, map[str, str] parameters) {
+   
+Response page(req:post(/^\/getValue\/<ev:[a-zA-Z0-9_]+>\/<name:[a-zA-Z0-9_]+>\/<v:.*>/, Body _)) {
 	// println("post: getValue: <name>, <parameters>");
 	// widget[name].f(ev, name, v);  // !!! The callback will be called
 	// println(parameters);
 	//  str lab = name;
-	for (str id<-parameters) {
+	for (str id<-req.parameters) {
 	     // println(id);
-	     callCallback(ev, id, parameters[id]);
+	     callCallback(ev, id, req.parameters[id]);
 	     }
 	callCallback(ev, name, v);
 	list[State] changed = diffNewOld();
 	// println(old);
-	map[str, Prop] c = toMapUnique(changed);	
-	map[str, map[str, value]] d = (s:makeMap(c[s])|s<-c);
+	map[str, Prop] changedMap1 = toMapUnique(changed);	
+	map[str, map[str, value]] changedMap = (s:makeMap(changedMap1[s])|s<-changedMap1);
 	if (!isEmpty(alert)) {
-      if (d[name]?)
-	    d[name]["alert"]=alert;
+      if (changedMap[name]?)
+	    changedMap[name]["alert"]=alert;
 	  else
-	    d[name] = ("alert":alert);
+	    changedMap[name] = ("alert":alert);
 	  alert = "";
 	  }
 	str g = prompt[0]=="undefined"?"":prompt[0];
-	if (d[name]?)
-	    d[name]["prompt"]=g;
+	if (changedMap[name]?)
+	    changedMap[name]["prompt"]=g;
 	else
-	    d[name] = ("prompt":g);
-	str res = toJSON(d, true);
+	    changedMap[name] = ("prompt":g);
+	// str res = toJSON(changedMap, true);
 	// println(d);
 	old = [s.v|s<-state];
-	prompt = <"", "">;
-	return response("<res>");
+	prompt = <"", "">; 
+	//return response("<res>"); 
+	return jsonResponse(ok(), (), changedMap);
 }
 
-default Response page(get(), str path, map[str, str] parameters) {
+default Response page(get(str path)) {
    println("File response: <base+path>");
    return response(base + path); 
    }
@@ -547,7 +547,8 @@ private loc startFigureServer() {
    while (true) {
     try {
       //println("Trying ... <site>");
-      serve(site, dispatchserver(page));
+      //serve(site, dispatchserver(page));
+      serve(site, page);
       return site;
     }  
     catch IO(_): {
@@ -1526,12 +1527,14 @@ num cyL(Figure f) =  f.cy<0?
       //Alignment align = isAlign(getAlign(fig))?getAlign(fig):f.align;
       Alignment align = f.align;
       str tg = "";
+      num x  = 0;
+      num y = 0;
       switch (f) {
           case ellipse(): {
                            tg = "ellipse";
                            num lww = lw>=0?lw:0;
-                           num x = cxL(f)-f.rx-lww/2;
-                           num y = cyL(f)-f.ry-lww/2;
+                           x = cxL(f)-f.rx-lww/2;
+                           y = cyL(f)-f.ry-lww/2;
                            if (f.width>=0 && f.rx<0) f.rx = f.width/2;
                            if (f.height>=0 && f.ry<0) f.ry = f.height/2;    
                            if (f.width<0 && f.rx>=0) f.width= round(f.rx*2+x);
@@ -1540,8 +1543,8 @@ num cyL(Figure f) =  f.cy<0?
           case circle(): {
                           num lww = lw>=0?lw:0;
                           tg = "circle";
-                          num x = cxL(f)-f.r-lww/2;
-                          num y = cyL(f)-f.r-lww/2;
+                          x = cxL(f)-f.r-lww/2;
+                          y = cyL(f)-f.r-lww/2;
                           if (f.width>=0 && f.height>=0 && f.r<0) 
                                        f.r = (max([f.width, f.height]))/2;
                           if (f.width<0 && f.r>=0) f.width= round(f.r*2+x);

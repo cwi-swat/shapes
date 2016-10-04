@@ -169,8 +169,7 @@ public alias Prop =
     
  
 // public str strEmpty() {return "";}
-    
-    
+       
 public data Figure(
         // Naming
         str id = "",

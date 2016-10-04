@@ -1,4 +1,4 @@
-module shapes::Examples
+module shapes::examples::Examples
 
 import shapes::Figure;
 import shapes::FigureServer; 
@@ -1084,8 +1084,8 @@ Figure examples() {
  
 
 void allExamples(){
-   //render(examples()
-   renderShow(examples()//, javaLoc=|file:///ufs/bertl/jdk1.8.0_77|
+   // render(examples()
+   renderShow(examples(), javaLoc=|file:///ufs/bertl/jdk1.8.0_77|
     , screenWidth=1200, screenHeight = 1200
     );
 }
