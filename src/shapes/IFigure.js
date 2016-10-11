@@ -682,9 +682,21 @@ function defH(v) {
 function adjustText(id1) {
 	var width = document.getElementById(id1).getBoundingClientRect().width;
 	var height = document.getElementById(id1).getBoundingClientRect().height;
-	d3.select("#" + id1).attr("width", "" + width + "px").attr("height",
-			"" + height + "px").attr("x", width / 2).attr("y", height / 2)
-			.attr("dy", ".3em");
+	if (!invalid(width) && !invalid(height)) {
+		d3.select("#" + id1).attr("width", "" + width + "px").attr("height",
+				"" + height + "px").attr("x", width / 2).attr("y", height / 2)
+				.attr("dy", ".3em");
+	 }
+	else {
+		fontSize=parseInt(d3.select("#" + id1).style("font-size"));
+		n =  parseInt(d3.select("#" + id1).text().length)*fontSize;
+		d3.select("#" + id1+"_fo").attr("width", "" + n + "px").attr("height","" +  fontSize+ "px");
+		d3.select("#" + id1).style("width", "" + n + "px").style("height","" +  fontSize+ "px");
+				;
+		d3.select("#" + id1).attr("width", "" + n + "px").attr("height","" +  fontSize + "px")
+		     .attr("dy", ".3em")
+		;		
+	}
 }
 
 function invalid(v) {

@@ -218,7 +218,19 @@ public data Figure(
 		str fontWeight = "", // normal|bold|bolder|lighter|number|initial|inherit; normal==400, bold==700
 		str fontColor = "",  // default "black",
 		str textDecoration	= "", // none|underline|overline|line-through|initial|inherit
+		real fontLineWidth = -1.0,
+		str fontLineColor = "",
 		
+		
+		// In tables
+		int rowspan = -1,
+		int colspan = -1,
+		str borderStyle="", 
+		int borderWidth=-1, 
+		str borderColor = "",
+		str borderTopStyle="", 
+		int borderTopWidth=-1, 
+		str borderTopColor = "",
 		// Interaction
 		Event event = noEvent(),
 		
@@ -235,6 +247,7 @@ public data Figure(
 // atomic primitivesreturn [[z] +[*((c[z]?)?c[z]:"null")|c<-m]|z<-x];
 	
    | htmlText(value text, str overflow = "hidden")		    			// text label html
+   | svgText(value text, str overflow = "hidden")		    			// text label html
    | text(value text, str overflow = "hidden")		    			// text label svg
 // | markdown(value text)					// text with markdown markup (TODO: make flavor of text?)
 // | math(value text)						// text with latex markup
@@ -277,7 +290,7 @@ public data Figure(
    | hcat(Figures figs=[], str borderStyle="solid", int borderWidth=0, str borderColor = "", bool form= false) 					// horizontal and vertical concatenation
    | vcat(Figures figs=[], str borderStyle="solid", int borderWidth=0, str borderColor = "", bool form= false) 					// horizontal and vertical concatenation 
    | overlay(Figures figs=[])				
-   | grid(list[Figures] figArray = [[]], str borderStyle="solid", int borderWidth=0, str borderColor = "", bool form= false) 	// grid of figures
+   | grid(list[Figures] figArray = [[]], bool form= false) 	// grid of figures
 
 // Figure transformations
 

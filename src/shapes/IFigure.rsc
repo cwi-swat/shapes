@@ -843,11 +843,12 @@ str debugStyle() {
     return "";
     }
 
-str borderStyle(Figure f) {
-      return 
+str borderStyleF(Figure f) {
+      str r = 
       "<style("border-width",f.borderWidth)> 
       '<style("border-style",f.borderStyle)>
       '<style("border-color",f.borderColor)>";
+      return r;
      }
     
 str style(str key, str v) {
@@ -961,7 +962,7 @@ int getTextY(Figure f) {
      }  
           
 IFigure _text(str id, bool inHtml, Figure f, str s, str overflow, bool addSvgTag) {
-    bool isHtml = inHtml || htmlText(_):=f;
+    bool isHtml = (text(_):=f && inHtml) || htmlText(_):=f;
     str begintag = "";
     bool tagSet = false;
     if (!isHtml || inHtml && addSvgTag) {
@@ -979,8 +980,10 @@ IFigure _text(str id, bool inHtml, Figure f, str s, str overflow, bool addSvgTag
     if (tagSet) {
          endtag+="\</svg\>"; 
          }
-    if (!isHtml)
-          f.fillColor = isEmpty(f.fontColor)?"black":f.fontColor;
+    // if (isEmpty(f.fontColor)) f.fontColor="black";
+    
+    //if (!isHtml)
+    //      f.fillColor = isEmpty(f.fontColor)?"black":f.fontColor;
     f.lineWidth = 0;
     widget[id] = <null, seq, id, begintag, endtag, 
         "
@@ -994,7 +997,11 @@ IFigure _text(str id, bool inHtml, Figure f, str s, str overflow, bool addSvgTag
         '<style("font-weight", f.fontWeight)>
         '<style("text-decoration", f.textDecoration)>
         '// <style("visibility", getVisibility(f))>
-        '<isHtml?style("color", f.fontColor):(style("fill", f.fillColor))>
+        '<isHtml?style("color", f.fontColor):(style("fill", f.fontColor))>
+        '<if (!isHtml){> 
+        '<style("stroke",f.fontLineColor)>
+        '<style("stroke-width", f.fontLineWidth)>
+        ' <}>
         '<isHtml?"":style("text-anchor", "middle")> 
         '<isHtml?style("overflow", overflow):"">
         '<isHtml?style("pointer-events", overflow=="hidden"?"none":"auto"):attr("pointer-events", "none")>
@@ -2259,7 +2266,7 @@ IFigure _grid(str id, Figure f,  bool addSvgTag, list[list[IFigure]] figArray=[[
         'd3.select(\"#<id>_cancel\")<on("click", "doAllFunction(\"cancel\",\"<id>\")")>;
         'd3.select(\"#<id>_ok\")<on("click", "doAllFunction(\"ok\",\"<id>\")")>;
         'd3.select(\"#<id>\")       
-         '<debugStyle()>
+         '<if(debug){><debugStyle()><} else {> <borderStyleF(f)> <}>   
          '<on(f)>
          '<stylePx("width", f.width)><stylePx("height", f.height)> 
          '<attrPx("width", f.width)><attrPx("height", f.height)> 
@@ -2291,12 +2298,32 @@ IFigure _grid(str id, Figure f,  bool addSvgTag, list[list[IFigure]] figArray=[[
  IFigure td(str id, Figure f, IFigure fig1,  bool tr = false) {
     str begintag = tr?"\<tr\>":"";
     // Alignment align = isAlign(getAlign(fig1))?getAlign(fig1):f.align;
+    int rowspan = -1;
+    int colspan = -1;
+    str borderTopStyle=""; 
+    int borderTopWidth=-1; 
+    str borderTopColor = "";
+    str borderStyle=""; 
+    int borderWidth=-1; 
+    str borderColor = "";
+    if (figMap[getId(fig1)]?) {
+          Figure fig = figMap[getId(fig1)];
+          rowspan = fig.rowspan;
+          colspan = fig.colspan;
+          borderStyle= fig.borderStyle;
+		  borderWidth= fig.borderWidth;
+		  borderColor = fig.borderColor;
+          borderTopStyle= fig.borderTopStyle;
+		  borderTopWidth= fig.borderTopWidth;
+		  borderTopColor = fig.borderTopColor;
+          }
     Alignment align = isAlignment(getCellAlign(fig1))?getCellAlign(fig1):f.align;
-    // println(align);
-    begintag +="\<td  id=\"<id>\" <vAlign(align)> <hAlign(align)>\>";
+    begintag +=
+    "\<td  id=\"<id>\" <vAlign(align)> <hAlign(align)> <
+     rowspan>0?"rowspan=\"<rowspan>\"":""> <
+     colspan>0?"colspan=\"<colspan>\"":"">
+     \>";
     bool addSvgTag = (getAtX(fig1)!=0 ||  getAtY(fig1)!=0)&&f.width<0 &&f.height<0;
-    //println("HELP: <getAtX(fig1)>  <getAtY(fig1)>");
-   // bool addSvgTag = false;
     if (addSvgTag) {
           begintag+=
          "\<svg id=\"<id>_svg\"\> 
@@ -2311,7 +2338,13 @@ IFigure _grid(str id, Figure f,  bool addSvgTag, list[list[IFigure]] figArray=[[
     widget[id] = <null, seq, id, begintag, endtag,
         "
         'd3.select(\"#<id>\")
-        '<if(debug){><debugStyle()><} else {> <borderStyle(f)> <}>       
+        '// <if(debug){><debugStyle()><} else {> <borderStyleF(f)> <}>
+        '<style("border-style", borderStyle)> 
+        '<style("border-color", borderColor)>  
+        '<style("border-width", borderWidth)>   
+        '<style("border-top-style", borderTopStyle)> 
+        '<style("border-top-color", borderTopColor)>  
+        '<style("border-top-width", borderTopWidth)>       
         '<style("background-color", "<getFillColor(f)>")> 
         '<attr("pointer-events", "none")> ; 
         '<if(addSvgTag) {> 
@@ -2598,7 +2631,9 @@ IFigure _translate(Figure f,  bool addSvgTag = false,
         case htmlText(value s): {if (str t:=s) return _text(f.id, inHtml, f, t, f.overflow, addSvgTag);
                             return iemptyFigure(0);
                             } 
-        /* Only inside svg figure, not on top, hcat, vcat or grid  */
+        case svgText(value s): {if (str t:=s) return _text(f.id, inHtml, f, t, f.overflow, addSvgTag);
+                            return iemptyFigure(0);
+                            } 
         case text(value s): {if (str t:=s) return _text(f.id, inHtml, f, t, f.overflow, addSvgTag);
                             return iemptyFigure(0);
                             } 

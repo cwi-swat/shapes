@@ -336,8 +336,10 @@ public void fquest(loc l) = writeFile(l, toHtmlString(
          // , endMarker = ngon(n=3, r=10, fillColor = "purple", lineWidth = 0)
          // , scaleX=<<0, w>, <0, w>>, scaleY=<<0, h>, <0, h>>
          )
-         ,circle(r=4, fillColor="firebrick", cx = cx(from[f].x+0.25)+0.2*rv[0], cy = cy(from[f].y+hc/2)+0.2*rv[1]
+         // ,circle(r=4, fillColor="firebrick", cx = cx(from[f].x+0.25)+0.2*rv[0], cy = cy(from[f].y+hc/2)+0.2*rv[1]
+           ,atXY(cx(from[f].x+0.25)+toInt(0.2*rv[0])-2, cy(from[f].y+hc/2)+toInt(0.2*rv[1])-(rv[1]>0?2:6), circle(r=4, fillColor="firebrick"
            , tooltip=box(fig=text("<multiplicity(f, t)>"), fillColor="floralwhite", size=<50, 50>)
+           )
           //, tooltip = 
           //box(fig=
           //    hcat(figs=[box(size=<50, 50>)], borderWidth=10, borderStyle="groove"),
@@ -384,4 +386,30 @@ Figure ovl() = box(fig=overlay(size=<400, 400>, figs=[
  
  void ftxt(loc l) = writeFile(l, toHtmlString(txt())); 
  
+ Figure shadow(Figure fig) {
+      Figure ov = fig;
+      ov.fillColor = "grey"; ov.lineWidth = 0;
+      return overlay(figs=[atXY(20, 20, ov), fig]);
+      }
+      
+ void tshadow() = render(shadow(box(size=<100, 100>, fillColor="red")));
+ 
+ Figure at() {
+     list[Figure] fs= [atXY(arbInt(800), arbInt(800), rotateDeg(30, svgText(stringChar(arbInt(26)+97), fontStyle="normal" , fontFamily="serif"
+     , fontColor=randomColor(), fontLineColor=randomColor(), fontLineWidth=2.0, fontSize=40+arbInt(60))))|int i<-[0..200]];
+     return overlay(figs=fs);
+     }
+ 
+ void tat() = render(at());
+ 
+void ftat(loc l) = writeFile(l, toHtmlString(at())); 
+
+Figure span() = grid(figArray=[[text("0")], [text("a"), text("&nbsp;&nbsp;+", rowspan=2)],[text("c", borderStyle="solid", 
+        borderWidth=1, borderTopColor="red")]]);
+
+void fspan(loc l) = writeFile(l, toHtmlString(span())); 
+
+void tspan()=render(span());
+
+
           
