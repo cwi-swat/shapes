@@ -393,7 +393,7 @@ Figure france() = title("France", hcat(lineWidth = 0, figs=[
                     
 void tbelgium() = render(grid(figArray=[[belgium(width = 201, height = 50)]]));
 
-void fbelgium(loc l) = writeFile(l, toHtmlString(belgium(width = 200, height = 50)));
+void fbelgium(loc l) = writeFile(l, toHtmlString(grid(figArray=[[belgium(width = 201, height = 50)]])));
                     
 Figure flags() = grid(hgap=5, vgap = 5, figArray=[
                     [dutch()

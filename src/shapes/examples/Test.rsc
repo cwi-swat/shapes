@@ -58,6 +58,7 @@ public void standard() {
      
  public void ttests() = render(tests()); 
  
+ 
  public void ftests(loc l) = writeFile(l, toHtmlString(
    tests()
  ));
@@ -404,12 +405,156 @@ Figure ovl() = box(fig=overlay(size=<400, 400>, figs=[
  
 void ftat(loc l) = writeFile(l, toHtmlString(at())); 
 
-Figure span() = grid(figArray=[[text("0")], [text("a"), text("&nbsp;&nbsp;+", rowspan=2)],[text("c", borderStyle="solid", 
-        borderWidth=1, borderTopColor="red")]]);
+Figure span() = grid(/*borderWidth=1, borderStyle="solid", align=centerLeft,*/ figArray=[
+         [text("__"), text("__"),text("__"), text("__"), text("__"), text("__"), text("__")]
+         ,
+         [
+         text("", colspan=2),text("0", colspan=2),text("1", colspan=2)], 
+         [
+         text("", colspan=2),text("3", colspan=2),text("4", colspan=2),text("&nbsp;&nbsp;+", rowspan=2)]    
+        ,[
+          text("2", borderTopStyle="solid", borderWidth=1, borderTopColor="blue", colspan= 2)
+        , text("5", borderTopStyle="solid", borderWidth=1, borderTopColor="blue", colspan= 2),
+          text("6", borderTopStyle="solid", borderWidth=1, borderTopColor="blue", colspan= 2)
+        ] 
+         ,[text("", colspan=1), text("\<", colspan=2),  text("\<", colspan=2), text("", colspan=1)]     
+        ]);
 
 void fspan(loc l) = writeFile(l, toHtmlString(span())); 
 
 void tspan()=render(span());
 
+list[int] ndigits(int x)  {
+     return while(x>0) {
+          append(x%10);
+          x = x/10;
+          }
+     }
+     
+list[list[int]] mirror(list[list[int]] m) {
+   int nr  =size(m);
+   int nc = size(m[0]);
+   list[list[int]] r = [[]|_<-[0..nc]];
+    for (int i<-[0..nr]) 
+       for (int j<-[0..nc]) 
+           r[j]+=[m[i][j]];         
+    return r;
+    }
+     
+list[tuple[int, int, int]] add(list[list[int]] x) {
+     list[list[int]] y = mirror(x);
+     int i = 0;
+     int shift = 0;
+     list[tuple[int, int, int]] r =[];
+     for (d<-y) {
+         int s = sum(d);
+         int v = (s+shift)%10;
+         shift = s/10;
+         r+=<v, shift, i>;
+         i+=1;
+         }
+     return r;
+     }
 
-          
+Figure schoolSum(list[int] ds) {
+      list[list[int]] xs =[ndigits(d)|d<-ds];
+      int N = max([size(x)|x<-xs]);
+      xs = [x+[0|_<-[size(x)..N+1]]|x<-xs];
+      list[tuple[int, int, int]] s = add(xs);
+      int last = size([d|d<-s, d[1]!=0])-1;
+      println(s);
+      return grid(
+          figArray=[
+              [text("&nbsp;&nbsp;")|_<-xs+xs]
+              ]
+              +
+              [
+               [text("<d>", colspan=2)|d<-reverse(x)]|x<-xs
+              ]
+              +
+              [
+                [text("", colspan=1)]+
+                     [text("<(d[2]==e[2]&& e[1]>0)?"\<<e[1]>":"">", colspan=2)|e<-tail(reverse(s))]
+                      +(d[2]==last?[text("", rowspan=2), text("&nbsp;&nbsp;+", rowspan=2)]:[])
+                     |d<-head(s, size(s)-1), d[1]!=0
+              ]          
+              +     
+              [
+              [text("<d[0]>", borderTopStyle="solid", borderWidth=1, borderTopColor="blue", colspan=2)|d<-reverse(s)]
+              ]
+              
+          );
+      }
+
+ void tschoolSum(list[int] s)=render(schoolSum(s));  
+ 
+ Figures txts (list[int] vs) = [box(fig=text("<v>"), size=<30, 30>)|v<-vs];
+ 
+ Figures swap(int pos, int n) {
+       Figure to1 = ngon(n=3, r=6, angle =180, fillColor="black");
+       Figure to2 = ngon(n=3, r=6, fillColor="black");
+       Figures r = [text("")|_<-[0..pos]]+
+       [shape([move(1.0/(n*2),0.2), line(1.0/(n*2), 0.7), line(1.0/(n*2), 0.7), line(1.0-1.0/(n*2), 0.7), line(1.0-1.0/(n*2), 0.2)], scaleX=<<0, 1>, <0, n*30>>
+                , scaleY=<<0,1>,<0, 40>>,colspan=n, 
+                height= 50,  width = n*30, startMarker=to1, endMarker=to2)];
+       return r;
+       }
+ 
+ Figure bubbleSort(list[int] a) {
+       bool swapped = false;
+       list[list[Figure]] r = [txts(a)];    
+       do {
+          swapped = false;
+          int n = size(a);
+          for (int i <-[1..n]) {
+              if (a[i-1]>a[i]) {
+                  int x = a[i];
+                  a[i] = a[i-1];
+                  a[i-1] = x;
+                  r+=[swap(i-1, 2)];
+                  swapped = true;
+                  r+=[txts(a)];
+                  }
+              }
+          } 
+       while (swapped);
+       return grid(figArray=r);
+       }
+       
+ Figure combSort(list[int] a) {
+       int gap = size(a);
+       num shrink = 1.3;   
+       bool sorted = false;
+       list[list[Figure]] r = [txts(a)];    
+       do {
+          gap = floor(gap/shrink);
+          if (gap>1)
+               sorted = false;
+          else {
+            gap=1;
+            sorted = true;
+            }
+          int n = size(a);
+          for (int i <-[0..n-gap]) {
+              if (a[i]>a[i+gap]) {
+                  int x = a[i+gap];
+                  a[i+gap] = a[i];
+                  a[i] = x;
+                  r+=[swap(i, gap+1)];
+                  sorted = false;
+                  r+=[txts(a)];
+                  }
+              }
+          } 
+       while (!sorted);
+       return grid(figArray=r);
+       }
+ 
+ 
+ Figure srt(list[int] a) = bubbleSort(a);
+      
+ void tsrt(list[int] a) = render(srt(a )); 
+ 
+ void fsrt(loc l) = writeFile(l, toHtmlString(srt([5,3,1]))); 
+ 
+    

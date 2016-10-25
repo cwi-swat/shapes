@@ -52,7 +52,8 @@ function  treemapDraw(id, root, width, height, fillColor, inTooltip) {
 	var margin = {top: 40, right: 10, bottom: 10, left: 10},
 	width = width - margin.left - margin.right,
 	height = height - margin.top - margin.bottom;
-	var color = d3.scale.category20c();
+	var color = d3
+	.scale.category20c();
 	var treemap = d3.layout.treemap()
 	.size([width, height])
 	.sticky(true)

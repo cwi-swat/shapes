@@ -53,14 +53,14 @@ public Figure end(int width, int height, str lab) = box(size=<width, height>, fi
 
 public Figure decision() {
    int width = 150;
-   int height = 100;
+   int height = 80;
    int h = 20;
    int w = 50;
    int h1 =50;
    int w1 = 20; 
    int h0 = 40;
    int offs = h0+h1;
-   return overlay(size=<400, 600>, figs=[
+   return overlay(size=<400, 400>, figs=[
                         begin(width, h0, "Lamp doesn\'t work")
                       , atXY((width-w1)/2, h0, vArrow(w1, h1, "brown"))
                       , atXY(0, offs, diamond(width, height, "Lamp\<br\> plugged in?", "lightyellow"))

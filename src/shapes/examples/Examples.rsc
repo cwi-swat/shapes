@@ -983,6 +983,10 @@ Figure graphs() = hcat(figs=[graph1(), graph2()]);
 public Figure text0 = text("Hello");
 void ttext0(){ ex("text0", text0); }
 
+public void ftext0(loc l) = writeFile(l, toHtmlString(
+    text0
+ )); 
+
 public Figure text1 = text("Hello", fontSize=14, lineWidth=1);
 void ttext1(){ ex("text1", text1); }
 

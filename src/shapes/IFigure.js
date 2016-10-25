@@ -379,7 +379,6 @@ function nPoints(el) {
 }
 
 function fromInnerToOuterFigure(f, id1, toLw, hpad, vpad) {
-	// alert("noot");
 	var to = d3.select("#" + f.id);
 	var from = d3.select("#" + id1);
 	if (from.node().nodeName == "g") {
@@ -490,19 +489,14 @@ function adjust1(fromId, f, width, height) {
 
 function _adjust(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y, width,
 		height) {
-	// toId, fromId, hshrink, vshrink, toLw, n, angle, x , y
 	var to = d3.select("#" + toId);
 	toLw = corner(n, toLw);
 	width = width -  toLw - x;
 	height = height - toLw - y;
 	var w = Math.ceil(width * hshrink);
 	var h = Math.ceil(height * vshrink);
-	// alert("adjust1:"+ to.node().nodeName+" "+width+" "+height+" "+w+" "+h);
-	
 	var  invalidW = invalid(to.attr("width"))&&invalid(to.attr("w"));
 	var  invalidH = invalid(to.attr("height"))&&invalid(to.attr("h"));
-	// alert(invalidW);
-	// alert(""+toId+":"+to.attr("width")+":"+to.attr("w")+":"+invalidW+":"+to.node().nodeName);
 	switch (to.node().nodeName) {
 	case "FORM":
 	case "INPUT":
@@ -540,9 +534,6 @@ function _adjust(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y, width,
 				return [ a.x, a.y ].join(",");
 			}).join(" "));
 			to.attr("width", w).attr("height", h);
-			// var e = d3.select("#" + f.id + "_circle");
-			// e.attr("cx", (w+toLw)/2).attr("cy", (h+toLw)/2).attr("r", r);
-			// e.attr("width", w).attr("height", h);
 		}
 		break;
 	case "ellipse":
@@ -579,7 +570,7 @@ function _adjust(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y, width,
 	to.attr("pointer-events", "none");
 }
 
-function figShrink(id, hshrink, vshrink, lw, n, angle, align) {
+function figShrink(id, hshrink, vshrink, lw, n, angle, align, cellDefined) {
 	// alert("fig");
 	return {
 		id : id,
@@ -588,7 +579,8 @@ function figShrink(id, hshrink, vshrink, lw, n, angle, align) {
 		lw : lw,
 		n : n,
 		angle : angle,
-		align : align
+		align : align,
+		cellDefined: cellDefined
 	};
 }
 
@@ -627,14 +619,6 @@ function getVal(f, key) {
 			return d.attr("h");
 		return d.style(key);
 	}
-	/*
-	if (d.node().nodeName == "TABLE") {
-		if (key == "width")
-			return d.attr("w");
-		if (key == "height")
-			return d.attr("h");
-	}
-	*/
 	if (d.attr(key) == null) {
 		d = d3.select("#" + f.id + "_svg");
 		return d.empty() ? null : d.attr(key);
@@ -717,11 +701,9 @@ function adjustTd(to, from) {
 }
 
 function adjustTable(id1, clients) {
-	// alert("adjustTable");
+	// From inner to outer
 	var aUndefW = clients.filter(undefW);
 	var width = d3.select("#" + id1).attr("w");
-	// alert("adjustTable:"+aUndefWH.length+" "+width);
-	// alert(id1);
 	if (invalid(width) && aUndefW.length == 0) {
 		width = document.getElementById(id1).getBoundingClientRect().width;
 		d3.select("#" + id1).attr("w", "" + width + "px")
@@ -752,10 +734,10 @@ function adjustTable(id1, clients) {
 }
 
 function adjustTableWH1(id1, clients) {
+	// From inner to outer
 	var aUndefW = clients.filter(function(i) {
 		return i.filter(undefW).length != 0;
 	});
-	// alert("adjustTableWH1:"+width);
 	var width = d3.select("#" + id1).attr("w");
 	if (invalid(width)  && aUndefW.length == 0 ) {
 		width = document.getElementById(id1).getBoundingClientRect().width;
@@ -952,6 +934,7 @@ function transpose(original) {
 }
 
 function adjustTableWH(clients, id1, lw, hpad, vpad, hgap, vgap) {
+	// From  outer to inner figures
 	var c = d3.select("#" + id1);
 	var width = c.attr("w");
 	var height = c.attr("h");
@@ -993,7 +976,14 @@ function adjustTableWH(clients, id1, lw, hpad, vpad, hgap, vgap) {
 	var h = (height - sDefH) / nH;
 	for (var i = 0; i < aUndefWH.length; i++) {
 		for (var j = 0; j < aUndefWH[i].length; j++) {
-			adjust1(id1, aUndefWH[i][j], w, h);
+		   if (aUndefWH[i][j].cellDefined) {
+		      var q = d3.select("#" +  id1 + "_r_"+aUndefWH[i][j].id);
+		      var w1 = q.empty()?null:q.style("width");
+		      if (w1!=null && w1!="auto") w = parseInt(w1);
+		      var h1 = q.empty()?null:q.style("height");
+		      if (h1!=null && h1!="auto") h = parseInt(h1);
+		   }
+		   adjust1(id1, aUndefWH[i][j], w, h);
 		}
 	}
 }

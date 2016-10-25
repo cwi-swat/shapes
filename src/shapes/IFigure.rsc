@@ -1592,7 +1592,7 @@ num rescale(num d, Rescale s) = s[1][0] + (d-s[0][0])*(s[1][1]-s[1][0])/(s[0][1]
 str toP(num d, Rescale s) {
         num e = rescale(d, s);
         num v = abs(e);
-        return "<toInt(e)>.<toInt(v*10)%10><toInt(v*100)%10>";
+        return "<toInt(e)>.<toInt(v*10)%10><toInt(v*100)%10><toInt(v*1000)%10>";
         }
         
 str toP(num d) {
@@ -1733,7 +1733,7 @@ IFigure _shape(str id, Figure f,  IFigure fig = iemptyFigure(0)) {
             f.width = toInt(abs(f.scaleX[1][1]-f.scaleX[1][0]));
        if (abs(f.scaleY[1][1]-f.scaleY[1][0])>f.height)
            f.height = toInt(abs(f.scaleY[1][1]-f.scaleY[1][0]));
-       if (f.yReverse && f.scaleY==<<0,1>,<0,1>> && f.height>0) f.scaleY = <<0, f.height>, <f.height, 0>>;  
+       if (f.yReverse && f.scaleY==<<0,1>,<0,1>> && f.height>0) f.scaleY = <<0, f.height>, <f.height, 0>>; 
        str begintag = "";
        begintag+=
          "\<svg id=\"<id>_svg\"\><visitDefs(id, true)><if(f.yReverse){>\<g id=\"<id>_mirror\"\><}><beginRotate(f)>\<path id=\"<id>\"/\>       
@@ -2164,8 +2164,15 @@ IFigure _hcat(str id, Figure f, bool addSvgTag, IFigure fig1...) {
     }
  
        
-str figCall(IFigure f) = 
-"figShrink(\"<getId(f)>\", <getHshrink(f)>, <getVshrink(f)>, <getLineWidth(f)>, <getN(getId(f))>, <getAngle(getId(f))>, <toString(getCellAlign(f))>)";
+str figCall(IFigure f) {
+   bool cellDefined = false;
+   if (figMap[getId(f)]?) {
+          Figure fig = figMap[getId(f)];
+          cellDefined = (fig.rowspan?) || (fig.colspan?);
+          }
+   return 
+   "figShrink(\"<getId(f)>\", <getHshrink(f)>, <getVshrink(f)>, <getLineWidth(f)>, <getN(getId(f))>, <getAngle(getId(f))>, <toString(getCellAlign(f))>,<cellDefined>)";
+}
 
 str figCall(Figure f, int x, int y) = 
 "figGrow(\"<f.id>\", <f.hgrow>, <f.vgrow>, <getLineWidth(f)>, <getN(f)>, <getAngle(f)>, <toString(f.cellAlign)>, <x>, <y>)";
@@ -2214,6 +2221,7 @@ IFigure _vcat(str id, Figure f,  bool addSvgTag, IFigure fig1...) {
         '<style("border-spacing", "<f.hgap> <f.vgap>")> 
         '<style("stroke-width",getLineWidth(f))>
         '<style("visibility", getVisibility(f))>
+        '<style("page-break-inside", "avoid")>
         '<attr("pointer-events", "none")>
         '<_padding(f.padding)> ;
         'd3.selectAll(\".<id>_div\")<style("visibility", getVisibility(f))>;								
@@ -2289,7 +2297,7 @@ IFigure _grid(str id, Figure f,  bool addSvgTag, list[list[IFigure]] figArray=[[
        list[tuple[list[IFigure] f, int idx]] fig1 = [<figArray[i], i>|int i<-[0..size(figArray)]];
        adjust+=  "adjustTableWH(<figCallArray(figArray)>, \"<id>\", <-getLineWidth(f)>, 
          <-hPadding(f)>, <-vPadding(f)>,<f.hgap>, <f.vgap>);\n";
-       IFigure r = ifigure(id, [tr("<id>_<g.idx>", f, f.width, f.height, g.f ) | g<-fig1]);
+       IFigure r = ifigure(id, [tr("<id>_r", f, f.width, f.height, g.f ) | g<-fig1]);
        widgetOrder+= id;
        return  r;
       
@@ -2341,7 +2349,7 @@ IFigure _grid(str id, Figure f,  bool addSvgTag, list[list[IFigure]] figArray=[[
         '// <if(debug){><debugStyle()><} else {> <borderStyleF(f)> <}>
         '<style("border-style", borderStyle)> 
         '<style("border-color", borderColor)>  
-        '<style("border-width", borderWidth)>   
+        '<style("border-width", 1)>   
         '<style("border-top-style", borderTopStyle)> 
         '<style("border-top-color", borderTopColor)>  
         '<style("border-top-width", borderTopWidth)>       
@@ -2360,6 +2368,9 @@ IFigure _grid(str id, Figure f,  bool addSvgTag, list[list[IFigure]] figArray=[[
 	    '<}>
         ", f.width, f.height, getAtX(f), getAtY(f), 0, 0, align, align, getLineWidth(f), getLineColor(f)
          , f.sizeFromParent, false >;
+       Figure g = (figMap[getId(fig1)]?)?figMap[getId(fig1)]:emptyFigure();
+       //if (g.rowspan? || g.colspan?)
+       //    adjust+= fromOuterToInner(fig1, id, getN(fig1), getAngle(fig1), getAtX(fig1), getAtY(fig1));  
        addState(f);
        widgetOrder+= id;
     return ifigure(id, [fig1]);
