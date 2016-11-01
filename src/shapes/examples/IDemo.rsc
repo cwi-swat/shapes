@@ -8,6 +8,14 @@ import shapes::Render;
 
 str current = "white";
 
+public str lineColor  = "red";
+
+public str fillColor  = "green";
+
+public int lineWidth  = 1;
+
+public int r  = 180;
+
 Figure ft() = hcat(figs=[box(size=<150, 150>), choiceInput(size=<30, 100>)]);
 
 void tft() = render(ft());
@@ -22,15 +30,15 @@ Figure butt() = hcat(figs= [
        , id = "mies"
       , event = on("click", 
     void (str e, str n, str v) {
-       if (style("mies").fillColor=="green") {       
-          style("mies", fillColor="red");
+       if (style("mies").fillColor==a) {       
+          style("mies", fillColor=b);
           //style("mies", visibility="hidden");
           //style("teun", visibility="hidden");
           }
        else {
           //style("mies", visibility="visible");
           //style("teun", visibility="visible");
-          style("mies", fillColor="green");
+          style("mies", fillColor=a);
           }
        }
     )
@@ -421,6 +429,11 @@ Figure flipflop() {
   Figure ring() = circle(id="c", r=180, fillColor = "blue", event = on(["message", "click"],
       void(str e, str n, str v){
          if (e=="message") {
+             style("c", fillColor=fillColor);
+             style("c", lineColor=lineColor);
+             style("c", lineWidth=lineWidth);
+             attr("c", r=r);
+             /*
              int N = 100; 
              num x =  (100-20)*sin(phi); 
              int R = (100)+ toInt(x); 
@@ -429,6 +442,7 @@ Figure flipflop() {
              style("c", fillOpacity=d);
              phi = phi + PI()/N;
              if (phi>=2*PI()) phi = 0;
+             */
              }
          else {println("stop");timer("c", delay=10, command = "finish");}
          }

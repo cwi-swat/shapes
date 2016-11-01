@@ -462,7 +462,7 @@ Figure schoolSum(list[int] ds) {
       xs = [x+[0|_<-[size(x)..N+1]]|x<-xs];
       list[tuple[int, int, int]] s = add(xs);
       int last = size([d|d<-s, d[1]!=0])-1;
-      println(s);
+      // println(s);
       return grid(
           figArray=[
               [text("&nbsp;&nbsp;")|_<-xs+xs]
@@ -490,19 +490,37 @@ Figure schoolSum(list[int] ds) {
  
  Figures txts (list[int] vs) = [box(fig=text("<v>"), size=<30, 30>)|v<-vs];
  
- Figures swap(int pos, int n) {
+ 
+ Figure createDefaultShape(str id, int n) {
        Figure to1 = ngon(n=3, r=6, angle =180, fillColor="black");
        Figure to2 = ngon(n=3, r=6, fillColor="black");
-       Figures r = [text("")|_<-[0..pos]]+
-       [shape([move(1.0/(n*2),0.2), line(1.0/(n*2), 0.7), line(1.0/(n*2), 0.7), line(1.0-1.0/(n*2), 0.7), line(1.0-1.0/(n*2), 0.2)], scaleX=<<0, 1>, <0, n*30>>
-                , scaleY=<<0,1>,<0, 40>>,colspan=n, 
-                height= 50,  width = n*30, startMarker=to1, endMarker=to2)];
+       return shape([], scaleX=<<0, 1>, <0, n*30>>
+             ,scaleY=<<0,1>,<0, 40>>,colspan=n, id = id,
+              height= 50,  width = n*30, startMarker=to1, endMarker=to2, shapeCurved= true
+              );
+      }
+ 
+ str arrow(Figure f, int n, bool shapeCurved) {
+      f.shapeCurved = shapeCurved;
+      return getVerticeString(f, shapeCurved?
+         [move(1.0/(n*2),0.2), line((1.0/(n*2)+0.5)/2, 0.4), line(0.5, 0.5),line(1.0-1.0/(n*2), 0.2)]
+         :
+         [
+         move(1.0/(n*2),0.2), line(1.0/(n*2), 0.7), line(1.0-1.0/(n*2), 0.7), line(1.0-1.0/(n*2), 0.2)
+         ]
+         );
+      }
+ 
+ Figures swap(Figure f, int pos, int n) {     
+       Figures r = [text("")|_<-[0..pos]]+[f];
        return r;
        }
  
  Figure bubbleSort(list[int] a) {
+       map[str, tuple[str, str]] update=();
        bool swapped = false;
-       list[list[Figure]] r = [txts(a)];    
+       list[list[Figure]] r = [txts(a)]; 
+       int k = 0;   
        do {
           swapped = false;
           int n = size(a);
@@ -511,21 +529,36 @@ Figure schoolSum(list[int] ds) {
                   int x = a[i];
                   a[i] = a[i-1];
                   a[i-1] = x;
-                  r+=[swap(i-1, 2)];
+                  str id = "a<k>";
+                  k = k+1;
+                  Figure f = createDefaultShape(id, 2);
+                  r+=[swap(f ,i-1, 2)];
+                  update+=(id:<arrow(f, 2, true), arrow(f, 2, false)>);
                   swapped = true;
                   r+=[txts(a)];
                   }
               }
           } 
        while (swapped);
-       return grid(figArray=r);
+       return grid(figArray=r, event= on("load", void(str e, str n, str v) {
+                 println(update);
+                 for (x<-update) updateArrow(x, update[x][1]);
+                 }));
        }
        
+ void updateArrow(str n, str v) {
+     attr(n, d = v);
+     // println(f.id);
+     }
+       
+       
  Figure combSort(list[int] a) {
+       map[str, tuple[str, str]] update=();
        int gap = size(a);
        num shrink = 1.3;   
        bool sorted = false;
-       list[list[Figure]] r = [txts(a)];    
+       list[list[Figure]] r = [txts(a)];   
+       int k  =0; 
        do {
           gap = floor(gap/shrink);
           if (gap>1)
@@ -540,21 +573,85 @@ Figure schoolSum(list[int] ds) {
                   int x = a[i+gap];
                   a[i+gap] = a[i];
                   a[i] = x;
-                  r+=[swap(i, gap+1)];
+                  str id = "a<k>";
+                  k=k+1;
+                  Figure f = createDefaultShape(id, gap+1);
+                  r+=[swap(f, i, gap+1)];
+                  update+=(id:<arrow(f, gap+1, true), arrow(f, gap+1, false)>);         
                   sorted = false;
                   r+=[txts(a)];
                   }
               }
           } 
        while (!sorted);
-       return grid(figArray=r);
+       return vcat(figs=[
+              grid(figArray=r, event= on("load", void(str e, str n, str v) {
+                   if (map[str, bool] choice2checked:=  property("checkbox").\value) {
+                      for (x<-update) updateArrow(x, update[x][choice2checked["0"]
+                      ?0:1]);
+                      }
+                   })       
+                  )
+                  ,
+                  checkboxInput(id="checkbox", choices = ["0"], \value = (), labels=("0":"curved")
+                  , event = on("click", void(str e, str n, str v) {
+                        if (v=="-1")  for (x<-update) updateArrow(x, update[x][1]);
+                                 else for (x<-update) updateArrow(x, update[x][0]);
+                  }
+                  ))
+                  ])
+                  ;
        }
  
  
- Figure srt(list[int] a) = bubbleSort(a);
+ Figure srt(list[int] a) = combSort(a);
       
  void tsrt(list[int] a) = render(srt(a )); 
  
  void fsrt(loc l) = writeFile(l, toHtmlString(srt([5,3,1]))); 
  
-    
+ tuple[Figure, int] _gcd(int x, int y) {
+     int d =  x/y;
+     int r =  x%y;
+     return <grid(figArray= [
+             [text(""), text("<d>"
+               ,borderBottomStyle="solid", borderBottomWidth=1
+               )
+               ]
+            ,[text("<y>", padding=<0, 0, 2, 0>), text("<x>"
+                  // ,borderTopStyle="solid", borderTopWidth=1
+                  ,borderLeftStyle="solid", borderLeftWidth=1, padding = <2, 0, 2, 0>
+                 )]
+            ,[text(""), text("<d*y>", borderBottomStyle="solid", borderBottomWidth=1)]
+            ,[text(""), text("<r>")]
+          ], vgap = 2
+          ), r>;
+     }
+     
+ Figure move() {
+    num p = 0.7;
+    Figure to2 = ngon(n=3, r=8, fillColor="black");
+    Vertices vs = [move(0.2, p), line(p, 0.3)];
+    return shape(vs, size=<40, 60>, scaleX=<<0, 1>, <0, 40>>,scaleY=<<0,1>,<0, 60>>
+    , cellAlign=bottomMid, endMarker = to2);
+    }
+     
+ Figure gcd(int x, int y) {
+    tuple[Figure, int] g =_gcd(x, y);
+    list[tuple[Figure, int]] xs = [g];
+    int r = g[1];
+    while (r>0) {
+        g = _gcd(y, r);
+        y = r;
+        r = g[1];
+        xs+=[g];
+        }
+    // println(xs);
+    Figures fs = [z[0]|z<-xs];
+    fs = intercalate(move(), fs);
+    return grid(figArray=[fs]);
+    }
+ 
+ void tgcd(int x, int y) = render(gcd(x, y));
+ 
+ 

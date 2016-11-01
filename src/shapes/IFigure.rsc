@@ -299,7 +299,7 @@ str google = "\<script src=\'https://www.google.com/jsapi?autoload={
 ;     
        
 str getIntro() {
-   res = "\<html\>
+   str res = "\<html\>
         '\<head\>      
         '\<style\>
         'body {
@@ -454,6 +454,8 @@ public void invokeF(str e, str n, str v) {
        case void(str, str, real) f: f(e, n, toReal(v));
        }
     }
+    
+Figure _getFigure(str n) = figMap[n];
  
 void callCallback(str e, str n, str v) { 
    if (!figMap[n]?) return;
@@ -529,8 +531,6 @@ Response page(req:post(/^\/getValue\/<ev:[a-zA-Z0-9_]+>\/<name:[a-zA-Z0-9_]+>\/<
 	    changedMap[name]["prompt"]=g;
 	else
 	    changedMap[name] = ("prompt":g);
-	// str res = toJSON(changedMap, true);
-	// println(d);
 	old = [s.v|s<-state];
 	prompt = <"", "">; 
 	//return response("<res>"); 
@@ -1682,10 +1682,11 @@ str trVertices(Figure f) {
        scaleX = f.scaleX, scaleY=f.scaleY);
        }
      return "";
-     }
+     }     
       
 str trVertices(list[Vertex] vertices, bool shapeClosed = false, bool shapeCurved = true, bool shapeConnected = true,
     Rescale scaleX=<<0,1>, <0, 1>>, Rescale scaleY=<<0,1>, <0, 1>>) {
+    if (size(vertices)==0) return "";
 	str path = "M<toP(vertices[0].x, scaleX)> <toP(vertices[0].y, scaleY)>"; // Move to start point
 	int n = size(vertices);
 	if(shapeConnected && shapeCurved && n > 2){
@@ -1721,7 +1722,7 @@ str mS(Figure f, str v) = ((emptyFigure():=f)?"": v);
 IFigure _shape(str id, Figure f,  IFigure fig = iemptyFigure(0)) {
        num bottom = 0, right = 0;
        if (isEmpty(getFillColor(f))) f.fillColor= "white";
-       if (shape(list[Vertex] vs):= f) {
+       if (shape(list[Vertex] vs):= f && !isEmpty(vs)) {
            bottom = max([rescale(p.y, f.scaleY)|p<-vs]);
            right =  max([rescale(p.x, f.scaleX)|p<-vs]);
        }   
@@ -2038,7 +2039,7 @@ str flagsToString(list[bool] b, int l, int u) {
       }
        
  IFigure _checkboxInput(str id, Figure f, bool addSvgTag) {
-       if (map[str, bool] s2b := f.\value) {
+       if (map[str, bool] checked := f.\value && map[str, str] labels := f.labels) {
        int width = f.width;
        int height = f.height; 
        str begintag = "";
@@ -2048,16 +2049,17 @@ str flagsToString(list[bool] b, int l, int u) {
          '\<foreignObject id=\"<id>_fo\" x=0 y=0 width=\"<upperBound>px\" height=\"<upperBound>px\"\>";
          }
        begintag+="\<form id = \"<id>\"\>\<div align=\"left\"\>\<br\>";
-       map[str, bool] r = (x:(s2b[x]?)?s2b[x]:false|x<-f.choices);
+       map[str, bool] choice2checked = (choice:(checked[choice]?)?checked[choice]:false|str choice<-f.choices);
+       map[str, str] choice2label = (choice:(labels[choice]?)?labels[choice]:choice|str choice<-f.choices);
        int i = 0;
-       for (c<-f.choices) {
+       for (str choice<-f.choices) {
        begintag+="                
-            '\<input type=\"checkbox\" name=\"<id>_<c>_i\"  class=\"<id>  form\" id=\"<id>_<c>_i\" value=\"<c>\"
+            '\<input type=\"checkbox\" name=\"<id>_<choice>_i\"  class=\"<id>  form\" id=\"<id>_<choice>_i\" value=\"<choice>\"
             ' onclick=\"ask(\'click\', \'<id>\'
             ' ,(this.checked?\'<i+1>\':\'<-i-1>\'))\"
-            ' <r[c]?"checked":"">
+            ' <choice2checked[choice]?"checked":"">
             '/\>
-            <c>\<br\>
+            <choice2label[choice]>\<br\>
             "
             ;
         i=i+1;
@@ -2301,29 +2303,53 @@ IFigure _grid(str id, Figure f,  bool addSvgTag, list[list[IFigure]] figArray=[[
        widgetOrder+= id;
        return  r;
       
-       }       
+       } 
+       
+ alias BorderStyle= tuple[str style, int width, str color];
+       
+ str borderTd(IFigure fig1) {
+       BorderStyle normal=<"", -1, "">, top=<"", -1, "">, bottom=<"", -1, "">,
+       left=<"", -1, "">, right=<"", -1, "">;
+       if (figMap[getId(fig1)]?) {
+          Figure fig = figMap[getId(fig1)];
+          normal = <fig.borderStyle, fig.borderWidth, fig.borderColor>;
+          top = <fig.borderTopStyle, fig.borderTopWidth, fig.borderTopColor>;
+          bottom = <fig.borderBottomStyle, fig.borderBottomWidth, fig.borderBottomColor>;
+          left = <fig.borderLeftStyle, fig.borderLeftWidth, fig.borderLeftColor>;
+          right = <fig.borderRightStyle, fig.borderRightWidth, fig.borderRightColor>;
+          }
+      return 
+          "
+          '
+          '<style("border-style", normal.style)> 
+          '<style("border-color", normal.color)>  
+          '<style("border-width", normal.width)> 
+          '<style("border-top-style", top.style)> 
+          '<style("border-top-color", top.color)>  
+          '<style("border-top-width", top.width)>  
+          '<style("border-bottom-style", bottom.style)> 
+          '<style("border-bottom-color", bottom.color)>  
+          '<style("border-bottom-width", bottom.width)>  
+          '<style("border-left-style", left.style)> 
+          '<style("border-left-color", left.color)>  
+          '<style("border-left-width", left.width)>  
+          '<style("border-right-style", right.style)> 
+          '<style("border-right-color", right.color)>  
+          '<style("border-right-width", right.width)>    
+          ";
+       }      
    
  IFigure td(str id, Figure f, IFigure fig1,  bool tr = false) {
     str begintag = tr?"\<tr\>":"";
     // Alignment align = isAlign(getAlign(fig1))?getAlign(fig1):f.align;
     int rowspan = -1;
     int colspan = -1;
-    str borderTopStyle=""; 
-    int borderTopWidth=-1; 
-    str borderTopColor = "";
-    str borderStyle=""; 
-    int borderWidth=-1; 
-    str borderColor = "";
+    tuple[int, int, int, int] padding = <0, 0, 0, 0>; // left, top, right, botton 
     if (figMap[getId(fig1)]?) {
           Figure fig = figMap[getId(fig1)];
           rowspan = fig.rowspan;
           colspan = fig.colspan;
-          borderStyle= fig.borderStyle;
-		  borderWidth= fig.borderWidth;
-		  borderColor = fig.borderColor;
-          borderTopStyle= fig.borderTopStyle;
-		  borderTopWidth= fig.borderTopWidth;
-		  borderTopColor = fig.borderTopColor;
+          padding = fig.padding;
           }
     Alignment align = isAlignment(getCellAlign(fig1))?getCellAlign(fig1):f.align;
     begintag +=
@@ -2346,14 +2372,9 @@ IFigure _grid(str id, Figure f,  bool addSvgTag, list[list[IFigure]] figArray=[[
     widget[id] = <null, seq, id, begintag, endtag,
         "
         'd3.select(\"#<id>\")
-        '// <if(debug){><debugStyle()><} else {> <borderStyleF(f)> <}>
-        '<style("border-style", borderStyle)> 
-        '<style("border-color", borderColor)>  
-        '<style("border-width", 1)>   
-        '<style("border-top-style", borderTopStyle)> 
-        '<style("border-top-color", borderTopColor)>  
-        '<style("border-top-width", borderTopWidth)>       
+        '<borderTd(fig1)> 
         '<style("background-color", "<getFillColor(f)>")> 
+        '<_padding(padding)>
         '<attr("pointer-events", "none")> ; 
         '<if(addSvgTag) {> 
         '      var q = \"<getId(fig1)>\";
@@ -2855,6 +2876,7 @@ public void _render(Figure fig1, int width = -1, int height = -1,
         , resizable = resizable,
         defined = defined, cssFile = cssFile);
      }
+     
   
  //public void main() {
  //   clearWidget();

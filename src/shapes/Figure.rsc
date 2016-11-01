@@ -131,7 +131,9 @@ public data Attr (
     int height =  -1,
     int r = -1,
     num bigger = 1.0,
-    bool disabled = false 
+    str d = "",
+    bool disabled = false, 
+    bool shapeCurved = false 
     ) = attr();
     
 public data Property (
@@ -176,7 +178,7 @@ public data Figure(
         str visibility = "",  // hidden | visible
 		// Dimensions and Alignmenting
 		tuple[int,int] size = <0,0>,
-		tuple[int, int, int, int] padding = <0, 0, 0, 0>, // left, top, right, botton 
+		tuple[int, int, int, int] padding = <0, 0, 0, 0>, // left, top, right, bottom 
 		int width = -1,
 		int height = -1,
 		Position at = <0, 0>,
@@ -231,6 +233,15 @@ public data Figure(
 		str borderTopStyle="", 
 		int borderTopWidth=-1, 
 		str borderTopColor = "",
+		str borderBottomStyle="", 
+		int borderBottomWidth=-1, 
+		str borderBottomColor = "",
+		str borderLeftStyle="", 
+		int borderLeftWidth=-1, 
+		str borderLeftColor = "",
+		str borderRightStyle="", 
+		int borderRightWidth=-1, 
+		str borderRightColor = "",
 		// Interaction
 		Event event = noEvent(),
 		
@@ -304,7 +315,7 @@ public data Figure(
    
 // Input elements
    | buttonInput(str txt, bool disabled=false,  value \value = "")
-   | checkboxInput(list[str] choices = ["0"], value \value = ())
+   | checkboxInput(list[str] choices = ["0"], value \value = (), value labels=())
    | choiceInput(list[str] choices = ["0"], value \value = choices[0])
    // | colorInput()
    
@@ -351,6 +362,7 @@ public data Figure(
    |d3Treemap(DDD d = ddd(), bool inTooltip = false)
    |d3Tree(Figure root)
    |d3Tree(DDD d = ddd())
+ //  |pack(Figures fs=[])
    ;
    
 data GraphOptions = graphOptions(
@@ -908,5 +920,9 @@ public DDD fileMap(loc source, str suffix) {
  public int(num) latticeY(int height, int ny) {
      return int(num y){return toInt((y*height)/ny);};
      }
+     
+ public Figures intercalate(Figure sep, Figures l) = 
+	(isEmpty(l)) ? [] : ( head(l) | it + [sep]+[x]| x <- tail(l) );
+     
      
      
