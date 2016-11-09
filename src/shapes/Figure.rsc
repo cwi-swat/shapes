@@ -197,6 +197,7 @@ public data Figure(
 		int hgap = 0,
 		int vgap = 0,
         bool sizeFromParent = false,
+        bool pageBreak = false,
         
     	// Line properties
 		int lineWidth = -1,			
@@ -362,7 +363,7 @@ public data Figure(
    |d3Treemap(DDD d = ddd(), bool inTooltip = false)
    |d3Tree(Figure root)
    |d3Tree(DDD d = ddd())
- //  |pack(Figures fs=[])
+   |pack(Figures fs)
    ;
    
 data GraphOptions = graphOptions(

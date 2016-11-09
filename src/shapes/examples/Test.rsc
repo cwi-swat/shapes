@@ -2,6 +2,7 @@ module shapes::examples::Test
 import shapes::FigureServer;
 import shapes::Figure;
 import shapes::examples::Shortcuts;
+import shapes::examples::Steden;
 import shapes::Render;
 import util::Math;
 
@@ -654,4 +655,20 @@ Figure schoolSum(list[int] ds) {
  
  void tgcd(int x, int y) = render(gcd(x, y));
  
+ Figure pck1() = pack(
+    [circle(r=5*i, fillColor=pickColor())|i<-[2..10]]
+    );
  
+ Figure pck(bool rec) {
+      resetColor();
+      return pack(
+      [
+         *[box(size=<i*10*(j%2+1), ((j+1)%2+1)*i*10>, fillColor=pickColor())|j<-[1..40]] |i<-[2..6]
+      ]+[pck1()]  
+     );
+    }
+    
+ 
+ void tpck() = render(pck(true));
+ 
+ void fpck(loc l) = writeFile(l, toHtmlString(pck(true))); 

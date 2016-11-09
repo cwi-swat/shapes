@@ -265,7 +265,7 @@ str visitTooltipFigs() {
     }  
 
     
-str visitDefs(str id, bool orient) {
+str visitDefs(str id, bool marker) {
     if (defs[id]?) {
      for (f<-defs[id]) {
          // markerScript+= "alert(<getWidth(f)>);";
@@ -276,13 +276,15 @@ str visitDefs(str id, bool orient) {
          "
          ;       
          }
-     return "\<defs\>
-           ' <for (f<-defs[id]){> \<marker id=\"m_<f.id>\"        
-           ' refX = <orient?getWidth(f)/2:0>   refY = <orient?getHeight(f)/2:0> <orient?"orient=\"auto\"":"">
+     return "\n\<defs\>
+           ' <for (f<-defs[id]){> <if(marker){> \<marker id=\"m_<f.id>\" 
+           ' refX = <marker?getWidth(f)/2:0> refY = <marker?getHeight(f)/2:0> <marker?"orient=\"auto\"":"">
            ' \> 
+           ' <}else{>  \<g id=\"g_<f.id>\"\><}> 
            ' <visitFig(f)>
-           ' \</marker\> <}>
-           '\</defs\>
+           ' <if(marker){> \</marker\> <} else {>\</g\><}>
+           ' <}>
+           '\</defs\>\n
            ";
     }
     return "";
@@ -350,6 +352,7 @@ str getIntro() {
         '\</style\>   
         '<if (!isEmpty(cssLocation)) {> \<link rel=\"stylesheet\" href= \"<cssLocation>\" type=\"text/css\"/\> <}>
         '\<script src=\"IFigure.js\"\>\</script\>
+        '\<script src=\"Packer.js\"\>\</script\>
         '\<script src=\"pack.js\"\>\</script\>
         '\<script src=\"http://d3js.org/d3.v3.min.js\" charset=\"utf-8\"\>\</script\>        
         '\<script src=\"http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.min.js\"\>\</script\>
@@ -1070,13 +1073,14 @@ value vl(value v) {
     
 IFigure _googlechart(str cmd, str id, Figure f, bool addSvgTag) {
     str begintag = "";
-    if (addSvgTag) {
-          begintag+=
-         "\<svg id=\"<id>_svg\"\> \<foreignObject id=\"<id>_outer_fo\"  x=0 y=0 width=\"<upperBound>px\" height=\"<upperBound>px\"\>";
-         }
-    begintag+="\<div id=\"<id>\" class=\"google\" \>";
     int width = f.width;
     int height = f.height;
+    ChartOptions options = f.options;
+    if (addSvgTag) {
+          begintag+=
+         "\<svg id=\"<id>_svg\"\> \<foreignObject id=\"<id>_outer_fo\"  x=0 y=0 width=\"<options.width>px\" height=\"<options.height>px\"\>";
+         }
+    begintag+="\<div id=\"<id>\" class=\"google\" \>";
     Alignment align =  width<0?topLeft:f.align;
     str endtag = "\</div\>"; 
     if (addSvgTag) {
@@ -1267,7 +1271,7 @@ str addShape(Figure s) {
     int width = f.width;
     int height = f.height;
     str begintag =
-         "\<svg id=\"<id>_svg\"\>\<g id=\"<id>\"\><visitDefs(id, false)>";
+         "\<svg id=\"<id>_svg\"\>\<g id=\"<id>\"\>";
     str endtag="\</g\>\</svg\>";   
     Alignment align =  width<0?topLeft:f.align; 
     str fname = "graph_<id>";
@@ -1276,7 +1280,8 @@ str addShape(Figure s) {
         "        
         '<drawGraph(fname, id, trGraph(f), width, height)>
         'd3.select(\"#<id>\")
-        '<on(f)>;
+        '<on(f)>
+        '<style("page-break-before", f.pageBreak?"always":"auto")>
         ';
         'd3.select(\"#<id>_svg\")
         '<attrPx("width", width)><attrPx("height", height)>
@@ -1511,6 +1516,7 @@ bool hasInnerCircle(Figure f)  {
         'd3.select(\"#<id>_fo_table\")
         '<style("width", width)><style("height", height)>
         '<attr("pointer-events", "none")> 
+        '<style("page-break-before", f.pageBreak?"always":"auto")>
         '<_padding(f.padding)> 
         '<debugStyle()>
         ';
@@ -1718,6 +1724,28 @@ str directive(Vertex v) {switch(getName(v)) {
         }
         
 str mS(Figure f, str v) = ((emptyFigure():=f)?"": v);
+
+IFigure _pack(str id, Figure f, IFigure fig1...) {
+       int width = f.width<0?1000:f.width;
+       int height = f.height<0?10000:f.height;
+       str begintag=
+         "\<svg id=\"<id>_svg\" width=\"10000\" height=\"10000\" \>
+         ' \<g id=<id>\> 
+         ";
+       str endtag = "\</g\>\</svg\>";
+       widget[id] = <getCallback(f.event), seq, id, begintag, endtag, 
+        "
+        ' var blocks = [
+        ' <for (IFigure d<-fig1) {> {id:\"<getId(d)>\",w: getWidth(\"#<getId(d)>\"),h: getHeight(\"#<getId(d)>\"),x: 0, y: 0},<}>];
+        ' runPacker(\"<id>\", blocks, <width>, <height>);
+        'd3.select(\"#<id>\")
+        '<on(getEvent(f.event), "doFunction(\"<id>\")")>
+        '<styleInsideSvgOverlay(id, f)>
+        ", f.width, f.height, getAtX(f), getAtY(f), f.hshrink, f.vshrink, f.align, f.cellAlign,  getLineWidth(f), getLineColor(f)
+         , f.sizeFromParent, true >;
+       widgetOrder+= id;
+       return ifigure(id, fig1);
+       }
        
 IFigure _shape(str id, Figure f,  IFigure fig = iemptyFigure(0)) {
        num bottom = 0, right = 0;
@@ -1839,6 +1867,7 @@ IFigure _overlay(str id, Figure f, IFigure fig1...) {
         widget[id] = <getCallback(f.event), seq, id, begintag, endtag, 
         "
         'd3.select(\"#<id>\") 
+        '<attr("width", width)><attr("height", height)>
         '<styleInsideSvgOverlay(id, f)>    
         ';
         '<for (q<-fig1){> 
@@ -2457,6 +2486,39 @@ list[tuple[str, Figure]] addMarkers(Figure f, list[tuple[str, Figure]] ms) {
         }
     return r;
     }
+    
+Figure addPack(Figure f, Figure g) {
+   if (emptyFigure()!:=g) {
+     if (g.size != <0, 0>) {
+       g.width = g.size[0];
+       g.height = g.size[1];
+       }
+    if (circle():=g || ngon():=g) {
+      if (g.width<0) g.width = round(2 * g.r);
+      if (g.height<0) g.height = round(2 * g.r);
+      }
+    if (ellipse():=g) {
+      if (g.width<0) g.width = round(2 * g.rx);
+      if (g.height<0) g.height = round(2 * g.ry);
+      }
+    if (g.gap != <0, 0>) {
+       g.hgap = g.gap[0];
+       g.vgap = g.gap[1];
+       }
+     if (g.lineWidth<0) g.lineWidth = 1;
+     if (g.lineOpacity<0) g.lineOpacity = 1.0;
+     if (g.fillOpacity<0) g.fillOpacity = 1.0;
+     if (isEmpty(g.fillColor)) g.fillColor="none";
+     if (isEmpty(g.lineColor)) g.lineColor = "black";
+     if (isEmpty(g.visibility)) g.visibility = "inherit";
+     list[IFigure] fs = (defs[f.id]?)?defs[f.id]:[];
+     buildParentTree(g);
+     figMap[g.id] = g;
+     fs +=_translate(g);
+         defs[f.id] = fs;
+       } 
+     return g;
+   }
 
 Figure addMarker(Figure f, str id, Figure g) {
    if (emptyFigure()!:=g) {
@@ -2653,6 +2715,7 @@ IFigure _translate(Figure f,  bool addSvgTag = false,
              );
         case circle():  return _ellipse(f.id, true, f, fig = _translate(f.fig,  inHtml=true));
         case polygon():  return _polygon(f.id,  f);
+        case pack(Figures fs): return _pack(f.id, f, [_translate(q, addSvgTag = true)|q<-fs]);
         case shape(list[Vertex] _):  {
                        addMarker(f, "<f.id>_start", f.startMarker);
                        addMarker(f, "<f.id>_mid", f.midMarker);

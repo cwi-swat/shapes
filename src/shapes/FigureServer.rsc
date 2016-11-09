@@ -108,9 +108,20 @@ bool isEmptyValue(value v) {
     if (str x:=v) return isEmpty(x);
     return false;
     }
+    
+public str getVerticeString(Figure f, Vertices v ) {
+    f.vertices = v;
+    str d = trVertices(f);
+    return d;
+    }
+    
+public str getVerticeString(Figure f) {
+    str d = trVertices(f);
+    return d;
+    }
      
 public Attr attr(str id, int width = -1, int height = -1, int r = -1
-     , num bigger = 1.0, bool disabled = false) {
+     , num bigger = 1.0, bool disabled = false, str d ="", bool shapeCurved = false) {
      str idx = child(id);
      Attr v = _getAttr(idx);
      if (width!=-1) v.width = width;
@@ -118,6 +129,8 @@ public Attr attr(str id, int width = -1, int height = -1, int r = -1
      if (bigger>=0) v.bigger = bigger;    
      if (r!=-1) v.r = r;
      if (disabled?) v.disabled= disabled;
+     v.shapeCurved = shapeCurved;
+     if (!isEmpty(d)) v.d = d;
      _setAttr(idx, v);
      return v;
      }
@@ -410,5 +423,5 @@ void clearForm(list[list[Figure]] formArray) {
       }
   }
   
-  
+public Figure getFigure(str n) = _getFigure(n);
     

@@ -706,14 +706,16 @@ function adjustTable(id1, clients) {
 	var width = d3.select("#" + id1).attr("w");
 	if (invalid(width) && aUndefW.length == 0) {
 		width = document.getElementById(id1).getBoundingClientRect().width;
-		d3.select("#" + id1).attr("w", "" + width + "px")
+		d3.select("#" + id1).attr("w", "" + width + "px");
+		//d3.select("#" + id1).style("width", "" + width + "px");
 	}
 	var aUndefH = clients.filter(undefH);
 	var height = d3.select("#" + id1).attr("h");
 	if (invalid(height) && aUndefH.length == 0) {
 		height = document.getElementById(id1).getBoundingClientRect().height;
 		// height = document.getElementById(id1).outerHeight;
-		d3.select("#" + id1).attr("h", "" + height + "px")
+		d3.select("#" + id1).attr("h", "" + height + "px");
+		//d3.select("#" + id1).style("height", "" + height + "px");
 	}
 	// alert("adjustTable:"+width);
 	if (invalid(width) || invalid(height))
@@ -807,6 +809,8 @@ function adjustOverlay(clients, id1, lw, hpad, vpad) {
 		if (width == 0 || height == 0)
 			return;
 		if (!isEmpty) {
+			c = d3.select("#" + id1);
+			c.attr("width", width).attr("height", height);
 			c = d3.select("#" + id1 + "_svg");
 			c.attr("width", width).attr("height", height);
 		}
@@ -815,14 +819,28 @@ function adjustOverlay(clients, id1, lw, hpad, vpad) {
 		var e = d3.select("#" + clients[i].id + "_svg");
 		if (!e.empty()) {
 		   var d = d3.select("#" + clients[i].id);
-		   var w = parseInt(d.attr("width")) + parseInt(e.attr("x"));
-		   var h =  parseInt(d.attr("height")) + parseInt(e.attr("y"));
-		   var x = parseInt(e.attr("x"));
-		   var y = parseInt(e.attr("y"));
-		   // alert(clients);
 		   var align = clients[i].align;
-		   e.attr("x", x+xAlign(align, width, w));
-		   e.attr("y", y+yAlign(align, height, h));
+		   var w = 0; var x = 0;
+		   if (e.attr("x")!=null) {
+			  x = parseInt(e.attr("x"));
+			  if (d.attr("width")!=null) {
+		          w = parseInt(d.attr("width")) + x;
+			      e.attr("x", x+xAlign(align, width, w));
+			  }
+			  else e.attr("x", x);
+		   }
+		   var h = 0; var y = 0;  
+		   if (e.attr("y")!=null) {
+			   y = parseInt(e.attr("y"));
+			   if (d.attr("height")!=null) {
+		            h =  parseInt(d.attr("height")) + y;
+			        e.attr("y", y+yAlign(align, height, h));
+			        }
+			   else e.attr("y", y);
+		       }    
+		   // alert(clients);   
+		   
+		   
 		}
 	}
 }
@@ -1031,13 +1049,31 @@ function diagClose(e, id) {
 };
 
 function getWidth(q) {
-	var r = d3.select(q).attr("width");
+	var n = d3.select(q);
+	switch (n.node().nodeName) {
+	    case "FORM":
+	    case "INPUT":
+	    case "TABLE":	
+	    case "BUTTON":
+	    case "DIV":
+	    	return parseInt(n.style("width"));
+	    }
+	var r = n.attr("width");
 	// if (r==null|| r=="auto") r = d3.select(q).style("width");
 	return parseInt(r);
 }
 
 function getHeight(q) {
-	var r = d3.select(q).attr("height");
+	var n = d3.select(q);
+	switch (n.node().nodeName) {
+	    case "FORM":
+	    case "INPUT":
+	    case "TABLE":	
+	    case "BUTTON":
+	    case "DIV":
+	    	return parseInt(n.style("height"));
+	    }
+	var r = n.attr("height");
 	// if (r==null || r =="auto") r = d3.select(q).style("height");
 	return parseInt(r);
 }
@@ -1056,7 +1092,7 @@ function adjust_tooltip(parent, q, xv, yv) {
 	var h = getHeight("#" + q + "_svg");
 	var u = d3.select("#" + q + "_outer_fo");
 	var google = !d3.select("#" + q + "_fo").empty()
-    && !d3.select("#" + q + "_fo").select(".google").empty();
+       && !d3.select("#" + q + "_fo").select(".google").empty();
 	if (u.empty() && google) {
 	  	u = d3.select("#" + q + "_fo");
 	}

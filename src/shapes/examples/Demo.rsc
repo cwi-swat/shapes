@@ -412,7 +412,7 @@ list[tuple[str, Figure]] flagNodes = [<"nl", dutch()>, <"be", belgium()>
                   edge("be", "fr"), edge("be", "de"), edge("fr", "it")];
                   
                  
-Figure gflags() = graph(nodes=flagNodes, edges=flagEdges, size=<300, 600>);
+Figure gflags() = graph(nodes=flagNodes, edges=flagEdges, size=<300, 600>, pageBreak=true);
 
 void tgflags() = render(box(fig=gflags(), size=<400, 400>, align =  centerMid));
 
@@ -480,7 +480,7 @@ Figure ov() = overlay(figs = [
    ,rotateDeg(135, ovBox("green"))
    ,rotateDeg(0, ovBox("magenta"))
    ,rotateDeg(90, ovBox("blue"))
-    ]);
+    ]); 
 
 void tov()= render(ov());
 
@@ -648,17 +648,17 @@ public void ftetris1(loc l) = writeFile(l, toHtmlString(
 public list[list[Figure]] figures(bool tooltip) = 
 [
              [demo1(), demo2()]
-             ,[demo3() , demo4()]
+            ,[demo3() , demo4()]
              ,[demo5(), demo6()]
-             , [demo7(), demo8()]
-             ,[demo9(), demo10()]          
+             ,[demo7(), demo8()]
+              ,[demo9(), demo10()]          
              ,[demo15(), demo13()]
              ,[demo14(),demo11()]
              ,[demo16(), demo17()]
             ,[demo18(), demo19()]
             ,[tetris(), box(fig=shrink(false), size=<400, 400>)]
-           ,[steden2(tooltip=tooltip), steden3(tooltip=tooltip)]
-           ,[decision(), triangle()]
+            ,[steden2(tooltip=tooltip), steden3(tooltip=tooltip)]
+            ,[decision(), triangle()]
             ];
             
 Figure demoFig() = grid(vgap=4, figArray=figures(false));
@@ -686,4 +686,14 @@ list[Figure] sb(list[Figure] tt) = [sb(f)|Figure f<-tt];
  
  void fsummary(loc l) {
       writeFile(l, toHtmlString(summary(),  align = topLeft));
+      }
+ 
+ Figure _pdemo() = pack([*[x|x<-y]|y<-remove(figures(true), 4)]);
+ 
+ // Figure _pdemo() = pack([demo1(), demo2()]);
+ 
+ void pdemo()= render(_pdemo());
+ 
+ void fpdemo(loc l) {
+      writeFile(l, toHtmlString(_pdemo()));
       }
