@@ -1073,15 +1073,15 @@ value vl(value v) {
     
 IFigure _googlechart(str cmd, str id, Figure f, bool addSvgTag) {
     str begintag = "";
-    int width = f.width;
-    int height = f.height;
     ChartOptions options = f.options;
+    int width = f.width<0?options.width:f.width;
+    int height = f.height<0?options.height:f.height;    
     if (addSvgTag) {
           begintag+=
-         "\<svg id=\"<id>_svg\"\> \<foreignObject id=\"<id>_outer_fo\"  x=0 y=0 width=\"<options.width>px\" height=\"<options.height>px\"\>";
+         "\<svg id=\"<id>_svg\"\> \<foreignObject id=\"<id>_outer_fo\"  x=0 y=0 width=\"<width>px\" height=\"<height>px\"\>";
          }
     begintag+="\<div id=\"<id>\" class=\"google\" \>";
-    Alignment align =  width<0?topLeft:f.align;
+    Alignment align =  f.width<0?topLeft:f.align;
     str endtag = "\</div\>"; 
     if (addSvgTag) {
          endtag += "\</foreignObject\>\</svg\>"; 

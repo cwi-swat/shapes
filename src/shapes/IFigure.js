@@ -609,6 +609,9 @@ function getVal(f, key) {
 			var r = d.attr(key);
 			if (r != null)
 				return r;
+			d = d3.select("#" + f.id);
+			r = d.attr(key);
+			return (parseInt(r) < upperBound)?r:null;
 		}
 	}
 	d = d3.select("#" + f.id);
@@ -623,8 +626,6 @@ function getVal(f, key) {
 		d = d3.select("#" + f.id + "_svg");
 		return d.empty() ? null : d.attr(key);
 	}
-	if (parseInt(d.attr(key)) >= upperBound)
-		return null;
 	return d.attr(key);
 }
 
@@ -743,7 +744,7 @@ function adjustTableWH1(id1, clients) {
 	var width = d3.select("#" + id1).attr("w");
 	if (invalid(width)  && aUndefW.length == 0 ) {
 		width = document.getElementById(id1).getBoundingClientRect().width;
-		d3.select("#" + id1).attr("w", "" + width + "px").attr("width", width);
+		d3.select("#" + id1).attr("w", "" + width + "px"); //.attr("width", width);
 	}
 	
 	var aUndefH = clients.filter(function(i) {
@@ -752,7 +753,7 @@ function adjustTableWH1(id1, clients) {
 	var height = d3.select("#" + id1).attr("h");
 	if (invalid(height) && aUndefH.length == 0 ) {
 		height = document.getElementById(id1).getBoundingClientRect().height;
-		d3.select("#" + id1).attr("h","" + height + "px").attr("height", height);
+		d3.select("#" + id1).attr("h","" + height + "px");// .attr("height", height);
 	}
 	if (!d3.select("#" + id1+"_ok").empty()) {
 		  if (invalid(height)) height = document.getElementById(id1).getBoundingClientRect().height;
@@ -978,7 +979,7 @@ function adjustTableWH(clients, id1, lw, hpad, vpad, hgap, vgap) {
 			/ clients1.length, getMaxOfArray(clients.map(function(i) {
 		return sumWidth(i.filter(defW));
 	}))) : 0;
-	// alert(sDefW);
+	// alert(""+aUndefW.length+" "+ clients.length);
 	var sDefH = aUndefW.length < clients.length ? Math.max(parseInt(height)
 			/ clients.length, getMaxOfArray(clients1.map(function(i) {
 		return sumHeight(i.filter(defH));

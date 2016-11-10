@@ -86,12 +86,19 @@ public Figure steden3(bool tooltip=false) {return
                           ]);
                          }
    
- public void tsteden() {
-       render(box(size=<50, 50>, fillColor="yellow", tooltip=atXY(150, 150, box(lineWidth = 1, fillColor="antiquewhite", fig=steden()))));             
+ public Figure qsteden() {
+       // render(box(size=<50, 50>, fillColor="yellow", tooltip=atXY(150, 150, box(lineWidth = 1, fillColor="antiquewhite", fig=steden())))); 
+       return pack(
+          [steden()
+          ,steden()
+          ])
+          ;                
    }
    
+ public void tsteden() = render(qsteden());
+   
  public void fsteden(loc l) = writeFile(l, toHtmlString(
-      box(size=<50, 50>, fillColor="yellow", tooltip=frame(atXY(150, 150, box(lineWidth = 1, fig=steden()))))
+      qsteden()
    )); 
    
  public void tsteden2() {

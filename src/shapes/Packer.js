@@ -45,12 +45,11 @@ function runPacker(id, blocks, w, h) {
 	for(var n = 0 ; n < blocks.length ; n++) {
 		  var block = blocks[n];
 		  if (block.fit) {
-		         // p.append("use").attr("xlink:href","#g_"+block.id).attr("x",block.fit.x).attr("y", block.fit.y);
 			    var c = d3.select("#"+block.id+"_svg");
-			    c.attr("x", block.fit.x).attr("y", block.fit.y);
-			    var google = !d3.select("#" + block.id + "_fo").empty()
-			       && !d3.select("#" + block.id + "_fo").select(".google").empty();
-			    if (google) d3.select("#" + block.id + "_fo").attr("x", block.fit.x).attr("y", block.fit.y);
+			    if (c.select(".google").empty())
+			        c.attr("x", block.fit.x).attr("y", block.fit.y);
+			    else
+			        d3.select("#" + block.id + "_outer_fo").attr("x", block.fit.x).attr("y", block.fit.y);
 			    if (block.fit.x+block.w>width) width = block.fit.x+block.w;
 			    if (block.fit.y+block.h>height) height = block.fit.y+block.h;
 		  }

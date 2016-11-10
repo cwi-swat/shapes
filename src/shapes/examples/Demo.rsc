@@ -647,14 +647,14 @@ public void ftetris1(loc l) = writeFile(l, toHtmlString(
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 public list[list[Figure]] figures(bool tooltip) = 
 [
-             [demo1(), demo2()]
-            ,[demo3() , demo4()]
+              [demo1(), demo2()]
+             ,[demo3() , demo4()]
              ,[demo5(), demo6()]
              ,[demo7(), demo8()]
-              ,[demo9(), demo10()]          
-             ,[demo15(), demo13()]
-             ,[demo14(),demo11()]
-             ,[demo16(), demo17()]
+             , [demo9(), demo10()]          
+            ,[demo15(), demo13()]
+            ,[demo14(),demo11()]
+            ,[demo16(), demo17()]
             ,[demo18(), demo19()]
             ,[tetris(), box(fig=shrink(false), size=<400, 400>)]
             ,[steden2(tooltip=tooltip), steden3(tooltip=tooltip)]
@@ -688,7 +688,7 @@ list[Figure] sb(list[Figure] tt) = [sb(f)|Figure f<-tt];
       writeFile(l, toHtmlString(summary(),  align = topLeft));
       }
  
- Figure _pdemo() = pack([*[x|x<-y]|y<-remove(figures(true), 4)]);
+ Figure _pdemo() = pack([*[x|x<-y]|y<-remove(figures(true), 400)]);
  
  // Figure _pdemo() = pack([demo1(), demo2()]);
  
