@@ -87,10 +87,11 @@ public Figure steden3(bool tooltip=false) {return
                          }
    
  public Figure qsteden() {
-       // render(box(size=<50, 50>, fillColor="yellow", tooltip=atXY(150, 150, box(lineWidth = 1, fillColor="antiquewhite", fig=steden())))); 
-       return pack(
-          [steden()
-          ,steden()
+       // render(box(size=<50, 50>, fillColor="yellow", tooltip=atXY(150, 150, box(lineWidth = 1, fillColor="antiquewhite", fig=steden()))));
+        // return box(fig=steden()); 
+        return pack(
+           [hcat(figs=[box(size=<50, 50>, fillColor="yellow"), steden2()])
+           // ,hcat(figs=[steden3()])
           ])
           ;                
    }

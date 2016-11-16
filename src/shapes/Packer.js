@@ -27,10 +27,10 @@ Packer.prototype = {
       return null;
   },
 
-  splitNode: function(node, w, h) {
-    node.used = true;
+  splitNode: function(node, w, h) {  
     node.down  = { x: node.x,     y: node.y + h, w: node.w,     h: node.h - h, used:false };
     node.right = { x: node.x + w, y: node.y,     w: node.w - w, h: h , used: false         };
+    node.used = true;
     return node;
   }
 
@@ -49,14 +49,17 @@ function runPacker(id, blocks, w, h) {
 			    if (c.select(".google").empty())
 			        c.attr("x", block.fit.x).attr("y", block.fit.y);
 			    else
-			        d3.select("#" + block.id + "_outer_fo").attr("x", block.fit.x).attr("y", block.fit.y);
-			    if (block.fit.x+block.w>width) width = block.fit.x+block.w;
-			    if (block.fit.y+block.h>height) height = block.fit.y+block.h;
+			    	if (d3.select("#" + block.id + "_fo").empty())
+			    		d3.select("#" + block.id + "_outer_fo").attr("x", block.fit.x).attr("y", block.fit.y);
+			    	else	        
+			            d3.select("#" + block.id + "_fo").attr("x", block.fit.x).attr("y", block.fit.y);
+			    if (block.fit.y+block.h>height) height = block.fit.y+block.h; 
+			    if (block.fit.x+block.w>width) width = block.fit.x+block.w;		    
 		  }
 		}
 	var p = d3.select("#"+id);
 	p.attr("width", width).attr("height", height);
-	d3.select("#"+id+"_svg").attr("width", width+1).attr("height", height+1);
+	d3.select("#"+id+"_svg").attr("width", width).attr("height", height);
     }
 /*
 var packer = new Packer(1000, 1000);   // or:  new GrowingPacker();

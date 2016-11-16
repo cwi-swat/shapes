@@ -379,6 +379,8 @@ Figure ovl() = box(fig=overlay(size=<400, 400>, figs=[
           ]
           ));
           
+ void fovl(loc l) = writeFile(l, toHtmlString(ovl()));
+          
  void tovl() = render(ovl()/*, javaLoc=|file:///ufs/bertl/jdk1.8.0_77|*/);
  
  
@@ -656,15 +658,15 @@ Figure schoolSum(list[int] ds) {
  void tgcd(int x, int y) = render(gcd(x, y));
  
  Figure pck1() = pack(
-    [circle(r=5*i, fillColor=pickColor())|i<-[2..10]]
-    );
+    [box(lineWidth=0, fig=circle(r=i/6*4+4, fillColor="darkred"), grow=1.2)|i<-[0..18]], width = 110, align=centerMid, 
+    lineWidth=0);
  
  Figure pck(bool rec) {
       resetColor();
       return pack(
       [
          *[box(size=<i*10*(j%2+1), ((j+1)%2+1)*i*10>, fillColor=pickColor())|j<-[1..40]] |i<-[2..6]
-      ]+[pck1()]  
+      ]+[box(fig=pck1(), fillColor="antiqueWhite", lineWidth=0)] 
      );
     }
     
@@ -672,3 +674,11 @@ Figure schoolSum(list[int] ds) {
  void tpck() = render(pck(true));
  
  void fpck(loc l) = writeFile(l, toHtmlString(pck(true))); 
+ 
+list[Figure] btest() = [box(size=<50, 50>, fillColor="green"), box(size=<50, 50>, fillColor="red")];
+
+void tbtest() = render(btest());
+
+void fbtest(loc l) = writeFile(l, toHtmlString(btest())); 
+ 
+

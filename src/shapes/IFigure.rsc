@@ -83,7 +83,7 @@ public map[str, tuple[str, str]] dialog = ();
 
 public map[str, list[IFigure] ] defs = ();
 
-IFigure fig;
+list[IFigure] fig = [];
 
 int upperBound = 99999;
 int lowerBound = 2;
@@ -213,6 +213,7 @@ void addState(Figure f) {
       
 public void clearWidget() { 
     println("clearWidget");
+    fig = [];
     widget = (); widgetOrder = [];adjust=[]; googleChart=[]; loadCalls = []; graphs= [];
     markerScript = [];
     defs=(); 
@@ -230,14 +231,23 @@ public void clearWidget() {
     _display = true;
     }
     
-              
 str visitFig(IFigure fig) {
-    if (ifigure(str id, list[IFigure] f):= fig) {
-         return 
-    "<widget[id].begintag> <for(d<-f){><visitFig(d)><}><widget[id].endtag>\n";
-         }
-    if (ifigure(str content):=fig) return content;
+       if (ifigure(str id, list[IFigure] f):= fig) {
+          return "<widget[id].begintag> <for(d<-f){><visitFig(d)><}><widget[id].endtag>\n";
+       if (ifigure(str content):=fig) return content;
+       }
     return "";
+    }
+    
+              
+str visitFig(list[IFigure] figs) {
+    str r = "";
+    for (IFigure fig<-figs) {
+       r+="\<div class=\"page\"\>";
+       r+=visitFig(fig);
+       r+="\</div\>";
+       }
+    return r;
     }
  
 str visitTooltipFigs() {
@@ -322,10 +332,7 @@ str getIntro() {
        ' fill: #333;
        ' stroke-width: 1.5px;
        '  }
-       ' //#overlay svg {
-       ' //   width: 10000;
-       ' //   height: 10000;
-       '  //  }
+       ' .page {break-after: page;}
        '.tooltip{
        'position: absolute;
        'top: 0;
@@ -639,13 +646,12 @@ IFigure  _d3Tree(str id, Figure f, list[str] ids, list[IFigure] fig1, str json) 
      }
 
 
-public void _render(IFigure fig1, int width = 800, int height = 800, 
+public void _render(str id, IFigure fig1, int width = 800, int height = 800, 
      Alignment align = centerMid, int borderWidth = -1, str borderStyle="", str borderColor = "",
      str fillColor = "none", str lineColor = "black", bool display = true, Event event = noEvent(),
      bool resizable = true, bool defined = false, str cssFile= "")
      {
      _display = display;
-     str id = "figureArea";
     str begintag= beginTag(id, getAlign(fig1));
     str endtag = endTag(); 
     widget[id] = <(display?getRenderCallback(event):null), seq, id, begintag, endtag, 
@@ -668,7 +674,7 @@ public void _render(IFigure fig1, int width = 800, int height = 800,
       
        widgetOrder += id;
     adjust+=  "adjustTableW("+figCalls([fig1])+", \"<id>\", 0,  0, 0, 0, 0);\n";
-    fig = ifigure(id, [fig1]);
+    fig += [ifigure(id, [fig1])];
     // println("site=<site>");
     cssLocation = cssFile;
 }
@@ -1075,21 +1081,22 @@ IFigure _googlechart(str cmd, str id, Figure f, bool addSvgTag) {
     str begintag = "";
     ChartOptions options = f.options;
     int width = f.width<0?options.width:f.width;
-    int height = f.height<0?options.height:f.height;    
-    if (addSvgTag) {
+    int height = f.height<0?options.height:f.height; 
+    if (true || addSvgTag) {
           begintag+=
-         "\<svg id=\"<id>_svg\"\> \<foreignObject id=\"<id>_outer_fo\"  x=0 y=0 width=\"<width>px\" height=\"<height>px\"\>";
+         "\<svg id=\"<id>_svg\" width=\"<width>px\" height=\"<height>px\"\> \<foreignObject id=\"<id>_outer_fo\"  x=0 y=0 width=\"<width>px\" height=\"<height>px\"\>";
          }
     begintag+="\<div id=\"<id>\" class=\"google\" \>";
     Alignment align =  f.width<0?topLeft:f.align;
     str endtag = "\</div\>"; 
-    if (addSvgTag) {
+    if (true || addSvgTag) {
          endtag += "\</foreignObject\>\</svg\>"; 
          }
     str fname = "googleChart_<id>";
     googleChart+="<fname>();\n";
     widget[id] = <null, seq, id, begintag, endtag, 
         "
+        'd3.select(\"#<id>_outer_fo\")<attr("pointer-events", "all")>;
         'd3.select(\"#<id>\")
         '<debugStyle()>
         '<style("background-color", "<getFillColor(f)>")>
@@ -1098,7 +1105,7 @@ IFigure _googlechart(str cmd, str id, Figure f, bool addSvgTag) {
         '<drawVisualization(fname, trChart(cmd, id, f))>
         ';    
         "      
-        , f.width, f.height, getAtX(f), getAtY(f), f.hshrink, f.vshrink, align, align, getLineWidth(f), getLineColor(f), f.sizeFromParent, false >;
+        , width, height, getAtX(f), getAtY(f), f.hshrink, f.vshrink, align, align, getLineWidth(f), getLineColor(f), f.sizeFromParent, false >;
        addState(f);
        widgetOrder+= id;
        return ifigure(id, []);
@@ -1281,7 +1288,6 @@ str addShape(Figure s) {
         '<drawGraph(fname, id, trGraph(f), width, height)>
         'd3.select(\"#<id>\")
         '<on(f)>
-        '<style("page-break-before", f.pageBreak?"always":"auto")>
         ';
         'd3.select(\"#<id>_svg\")
         '<attrPx("width", width)><attrPx("height", height)>
@@ -1516,7 +1522,6 @@ bool hasInnerCircle(Figure f)  {
         'd3.select(\"#<id>_fo_table\")
         '<style("width", width)><style("height", height)>
         '<attr("pointer-events", "none")> 
-        '<style("page-break-before", f.pageBreak?"always":"auto")>
         '<_padding(f.padding)> 
         '<debugStyle()>
         ';
@@ -1728,6 +1733,7 @@ str mS(Figure f, str v) = ((emptyFigure():=f)?"": v);
 IFigure _pack(str id, Figure f, IFigure fig1...) {
        int width = f.width<0?1000:f.width;
        int height = f.height<0?10000:f.height;
+       f.width=-1; f.height= -1;
        str begintag=
          "\<svg id=\"<id>_svg\" width=\"10000\" height=\"10000\" \>
          ' \<g id=<id>\> 
@@ -1739,7 +1745,7 @@ IFigure _pack(str id, Figure f, IFigure fig1...) {
         ' <for (IFigure d<-fig1) {> {id:\"<getId(d)>\",w: getWidth(\"#<getId(d)>\"),h: getHeight(\"#<getId(d)>\"),x: 0, y: 0},<}>];
         ' runPacker(\"<id>\", blocks, <width>, <height>);
         'd3.select(\"#<id>\")
-        '<on(getEvent(f.event), "doFunction(\"<id>\")")>
+        '// <on(getEvent(f.event), "doFunction(\"<id>\")")>
         '<styleInsideSvgOverlay(id, f)>
         ", f.width, f.height, getAtX(f), getAtY(f), f.hshrink, f.vshrink, f.align, f.cellAlign,  getLineWidth(f), getLineColor(f)
          , f.sizeFromParent, true >;
@@ -2252,7 +2258,6 @@ IFigure _vcat(str id, Figure f,  bool addSvgTag, IFigure fig1...) {
         '<style("border-spacing", "<f.hgap> <f.vgap>")> 
         '<style("stroke-width",getLineWidth(f))>
         '<style("visibility", getVisibility(f))>
-        '<style("page-break-inside", "avoid")>
         '<attr("pointer-events", "none")>
         '<_padding(f.padding)> ;
         'd3.selectAll(\".<id>_div\")<style("visibility", getVisibility(f))>;								
@@ -2888,7 +2893,7 @@ DDD treeToDDD(Figure f) {
         return false;
      }  
      
-public void _render(Figure fig1, int width = -1, int height = -1, 
+public void _render(Figure f..., int width = -1, int height = -1, 
      Alignment align = centerMid, tuple[int, int] size = <0, 0>,
      str fillColor = "white", str lineColor = "black", 
      int lineWidth = 1, bool display = true, real lineOpacity = 1.0, real fillOpacity = 1.0
@@ -2901,11 +2906,7 @@ public void _render(Figure fig1, int width = -1, int height = -1,
             width = size[0];
             height = size[1];
          }
-        clearWidget();
-        if (atXY(_, _, _):= fig1 || atX(_,_):=fig1 || atY(_,_):=fig1){
-             align = topLeft; 
-             fig1=overlay(figs=[fig1]);
-             }  
+        clearWidget();  
         Figure h = emptyFigure();
         h.lineWidth = lineWidth<0?1:lineWidth;
         h.fillColor = fillColor;
@@ -2917,6 +2918,13 @@ public void _render(Figure fig1, int width = -1, int height = -1,
         h.align = align;
         h.id = "figureArea";
         figMap[h.id] = h;
+        fig=[];
+        int i = 0;
+        for (Figure fig1<-f) {
+        if (atXY(_, _, _):= fig1 || atX(_,_):=fig1 || atY(_,_):=fig1){
+             align = topLeft; 
+             fig1=overlay(figs=[fig1]);
+             }  
         if (fig1.size != <0, 0>) {
             fig1.width = fig1.size[0];
             fig1.height = fig1.size[1];
@@ -2934,10 +2942,12 @@ public void _render(Figure fig1, int width = -1, int height = -1,
         buildParentTree(fig1);
         IFigure f = _translate(fig1);
         addState(fig1);
-        _render(f , width = width, height = height, align = align, fillColor = fillColor, lineColor = lineColor,
+        _render("<h.id><i>", f , width = width, height = height, align = align, fillColor = fillColor, lineColor = lineColor,
         borderWidth = borderWidth, borderStyle = borderStyle, borderColor = borderColor, display = display, event = event
         , resizable = resizable,
         defined = defined, cssFile = cssFile);
+        i = i +1;
+        }
      }
      
   

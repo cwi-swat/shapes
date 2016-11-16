@@ -197,7 +197,6 @@ public data Figure(
 		int hgap = 0,
 		int vgap = 0,
         bool sizeFromParent = false,
-        bool pageBreak = false,
         
     	// Line properties
 		int lineWidth = -1,			

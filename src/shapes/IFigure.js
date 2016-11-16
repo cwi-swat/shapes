@@ -761,10 +761,10 @@ function adjustTableWH1(id1, clients) {
 		  height=parseInt(height)+bheight+5;
 	      d3.select("#" + id1).attr("h","" + height + "px").attr("height", height);
 	      }
-	d3.select("#" + id1 + "_outer_fo").attr("width", "" + width + "px").attr(
-			"height", "" + height + "px")
-	d3.select("#" + id1 + "_svg").attr("width", "" + width + "px").attr(
-			"height", "" + height + "px");
+	d3.select("#" + id1 + "_outer_fo").attr("width", "" + width).attr(
+			"height", "" + height )
+	d3.select("#" + id1 + "_svg").attr("width", "" + width).attr(
+			"height", "" + height);
 	// alert("adjustTableWH1:"+width);
 }
 
@@ -1057,7 +1057,9 @@ function getWidth(q) {
 	    case "TABLE":	
 	    case "BUTTON":
 	    case "DIV":
-	    	return parseInt(n.style("width"));
+	    	// alert("id="+q+" "+n.attr("width"));
+	    	var width = n.attr("width");
+	    	return width==null?parseInt(n.style("width")):parseInt(width);
 	    }
 	var r = n.attr("width");
 	// if (r==null|| r=="auto") r = d3.select(q).style("width");
@@ -1072,7 +1074,8 @@ function getHeight(q) {
 	    case "TABLE":	
 	    case "BUTTON":
 	    case "DIV":
-	    	return parseInt(n.style("height"));
+	    	var height = n.attr("height");
+	    	return height==null?parseInt(n.style("height")):parseInt(height);
 	    }
 	var r = n.attr("height");
 	// if (r==null || r =="auto") r = d3.select(q).style("height");

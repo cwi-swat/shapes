@@ -4,7 +4,7 @@ import shapes::FigureServer;
 import shapes::Figure;
 import shapes::IFigure;
 
-public void render(Figure fig1, int width = -1, int height = -1, 
+public void render(Figure fig1..., int width = -1, int height = -1, 
      Alignment align = <0.5, 0.5>, tuple[int, int] size = <0, 0>,
      str fillColor = "none", str lineColor = "black", bool debug = false,  
      Event event = on(nullCallback), int borderWidth = -1, str borderStyle = "", str borderColor = ""

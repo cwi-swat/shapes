@@ -7,7 +7,7 @@ import Prelude;
 import util::Resources;  
 
 public void renderWeb(
-      Figure fig1, int width = -1, int height = -1, int lineWidth = -1,
+      Figure fig1..., int width = -1, int height = -1, int lineWidth = -1,
      Alignment align = <0.5, 0.5>, tuple[int, int] size = <0, 0>,
      Event event = on(nullCallback),
      str fillColor = "white", str lineColor = "black", bool debug = false
@@ -36,7 +36,7 @@ public void renderWeb(
      
 
       
-public str toHtmlString(Figure fig1, int width = -1, int height = -1, 
+public str toHtmlString(Figure fig1..., int width = -1, int height = -1, 
      Alignment align = <0.5, 0.5>, tuple[int, int] size = <0, 0>,
      str fillColor = "white", str lineColor = "black", bool debug = false
      , int borderWidth = -1,  str borderColor = "", str borderStyle = "", bool resizable = true,
@@ -72,7 +72,7 @@ public void renderSave(Figure fig1, loc pngFile
       );  
       }
       
-public void renderShow(Figure fig1
+public void renderShow(Figure fig1...
      ,int width = -1, int height = -1
      ,Alignment align = <0.5, 0.5>, tuple[int, int] size = <0, 0>
      ,str fillColor = "white", str lineColor = "black", bool debug = false

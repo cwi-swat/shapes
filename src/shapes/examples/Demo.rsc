@@ -661,6 +661,13 @@ public list[list[Figure]] figures(bool tooltip) =
             ,[decision(), triangle()]
             ];
             
+ public list[Figure] packList() = [
+     pack([demo1(), demo2(), demo3() , demo4(), demo5(), demo6(), demo7() ,demo8()])
+     ,pack([demo9(), demo10(), demo15() , demo13(), demo18(), demo19()])
+     ,pack([demo14(), demo11(), demo16() , demo17(), tetris(), box(fig=shrink(false), size=<400, 400>),decision(), triangle()
+    , steden2(), steden3()])
+     ];
+            
 Figure demoFig() = grid(vgap=4, figArray=figures(false));
             
 
@@ -692,8 +699,8 @@ list[Figure] sb(list[Figure] tt) = [sb(f)|Figure f<-tt];
  
  // Figure _pdemo() = pack([demo1(), demo2()]);
  
- void pdemo()= render(_pdemo());
+ void pdemo()= render(packList());
  
  void fpdemo(loc l) {
-      writeFile(l, toHtmlString(_pdemo()));
+      writeFile(l, toHtmlString(packList()));
       }
