@@ -394,14 +394,22 @@ function fromInnerToOuterFigure(f, id1, toLw, hpad, vpad) {
 	var width = 0;
 	if (!invalid(from.attr("width")))
 		width = parseInt(from.attr("width"));
-	else {
-		width = document.getElementById(id1).getBoundingClientRect().width;
-	}
+	else
+	if (!invalid(from.attr("w"))) {
+		width = parseInt(from.attr("w"))+fromLw;
+	    }
+	 else {
+	 	width = document.getElementById(id1).getBoundingClientRect().width;
+	   }
 	var height = 0;
 	if (!invalid(from.attr("height")))
 		height = parseInt(from.attr("height"));
 	else
-		height = document.getElementById(id1).getBoundingClientRect().height;
+	if (!invalid(from.attr("h"))) {
+		height= parseInt(from.attr("h"))+fromLw;
+	    }
+	else
+	 	height = document.getElementById(id1).getBoundingClientRect().height;
 	// alert("height:"+height+":"+document.getElementById(id1).getBoundingClientRect().height+":"+id1);
 	if (width == 0 || height == 0)
 		return;
@@ -611,7 +619,7 @@ function getVal(f, key) {
 				return r;
 			d = d3.select("#" + f.id);
 			r = d.attr(key);
-			return (parseInt(r) < upperBound)?r:null;
+			if (r!=null) return (parseInt(r) < upperBound)?r:null;
 		}
 	}
 	d = d3.select("#" + f.id);
@@ -705,6 +713,8 @@ function adjustTable(id1, clients) {
 	// From inner to outer
 	var aUndefW = clients.filter(undefW);
 	var width = d3.select("#" + id1).attr("w");
+	var lw = d3.select("#" + id1).style("stroke-width");
+	lw = lw==null?0:parseInt(lw);
 	if (invalid(width) && aUndefW.length == 0) {
 		width = document.getElementById(id1).getBoundingClientRect().width;
 		d3.select("#" + id1).attr("w", "" + width + "px");
@@ -730,10 +740,10 @@ function adjustTable(id1, clients) {
 	    x =  parseInt(d3.select("#" + id1 + "_outer_fo").attr("x"));
 	    y=   parseInt(d3.select("#" + id1 + "_outer_fo").attr("y"));
 	    }
-	d3.select("#" + id1 + "_outer_fo").attr("width", "" + width + "px").attr(
-			"height", "" + height + "px")
-	d3.select("#" + id1 + "_svg").attr("width", "" + (width+x) + "px").attr(
-			"height", "" + (height+y) + "px");
+	d3.select("#" + id1 + "_outer_fo").attr("width", "" + (width+lw*(clients.length)) + "px").attr(
+			"height", "" + (height+lw*(clients.length)) + "px")
+	d3.select("#" + id1 + "_svg").attr("width", "" + (width+x+lw*(clients.length)) + "px").attr(
+			"height", "" + (height+y+lw*(clients.length)) + "px");
 }
 
 function adjustTableWH1(id1, clients) {
@@ -1022,6 +1032,8 @@ function fromOuterToInner(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y) 
 	var width = from.attr("width");
 	var height = from.attr("height");
 	if (invalid(from.attr("width")) || invalid(from.attr("height"))) {
+		//width = from.attr("w");
+		//height = from.attr("h");
 		width = document.getElementById(fromId).getBoundingClientRect().width;
 		height = document.getElementById(fromId).getBoundingClientRect().height;
 	}

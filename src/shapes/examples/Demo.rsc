@@ -34,16 +34,23 @@ public Figure newNgon(str lc, Figure el) {
 
 public Figure demo1() {
           list[str] colors = ["antiquewhite", "yellow", "red","blue" ,"grey","magenta"];
-           return hcat(size=<300, 400>, figs=[
+           return // pack([
+              hcat(size=<300, 400>, hgap=0, lineWidth = 10, figs=[
              (idNgon(5, 20) |newNgon(e, it)| e<-colors)
              ,
              (idNgon(5, -1) |newNgon(e, it)| e<-colors)
-           ]);}
-void tdemo1()  {render(demo1());}
+           ])
+           // ], size=<500, 500>)
+           ;}
+void tdemo1()  {render(
+         //pack([
+            box(fig=demo1())
+          // ])
+         , debug=false, width = 600, height = 600);}
 
 
  void tfdemo1(loc l) {
-      writeFile(l, toHtmlString(demo1(), debug = false, width = 600, height = 600));
+      writeFile(l, toHtmlString(box(fig=demo1()), debug = false, width = 600, height = 600));
       }
 
 // --------------------------------------------------------------------------
@@ -81,7 +88,7 @@ public Figure newEllipse(str lc, Figure el) {
       }
 public Figure demo3() {
       list[str] colors = ["red","blue" ,"grey","magenta", "brown", "green"];
-      return hcat(fillColor="none", size=<400, 200>, hgap = 6, figs = [
+      return hcat(fillColor="none", size=<400, 200>, hgap = 6,  figs = [
       (idEllipse(17, 12) |newEllipse(e,  it)| e<-colors)
       ,
       // frame(
@@ -644,28 +651,91 @@ public void ftetris1(loc l) = writeFile(l, toHtmlString(
     grid(borderStyle="ridge", borderWidth = 4,hgap=4, vgap = 4, id="aap", figArray=[[_tetris1(),  _tetris5()]])
 ));
 
+Figure pck1() = pack(
+    [box(lineWidth=0, fig=circle(r=i/6*3+3, fillColor="darkred"), grow=1.2)|i<-[0..18]], width = 110, align=centerMid, 
+    lineWidth=0);
+ 
+ Figure pck() {
+      resetColor();
+      return pack(
+      [
+         *[box(size=<i*5*(j%2+1), ((j+1)%2+1)*i*5>, fillColor=pickColor())|j<-[1..20]] |i<-[3..6]
+      ]+[box(fig=pck1(), fillColor="antiqueWhite", lineWidth=0)] 
+     size=<200, 200>);
+    }
+    
+ 
+ void tpck() = render(pck());
+ 
+ void fpck(loc l) = writeFile(l, toHtmlString(pck(true))); 
+ 
+ tuple[Figure, int] _gcd(int x, int y) {
+     int d =  x/y;
+     int r =  x%y;
+     return <grid(figArray= [
+             [text(""), text("<d>"
+               ,borderBottomStyle="solid", borderBottomWidth=1
+               )
+               ]
+            ,[text("<y>", padding=<0, 0, 2, 0>), text("<x>"
+                  // ,borderTopStyle="solid", borderTopWidth=1
+                  ,borderLeftStyle="solid", borderLeftWidth=1, padding = <2, 0, 2, 0>
+                 )]
+            ,[text(""), text("<d*y>", borderBottomStyle="solid", borderBottomWidth=1)]
+            ,[text(""), text("<r>")]
+          ], vgap = 2
+          ), r>;
+     }
+     
+ Figure move() {
+    num p = 0.7;
+    Figure to2 = ngon(n=3, r=8, fillColor="black");
+    Vertices vs = [move(0.2, p), line(p, 0.3)];
+    return shape(vs, size=<40, 60>, scaleX=<<0, 1>, <0, 40>>,scaleY=<<0,1>,<0, 60>>
+    , cellAlign=bottomMid, endMarker = to2);
+    }
+     
+ Figure gcd(int x, int y) {
+    tuple[Figure, int] g =_gcd(x, y);
+    list[tuple[Figure, int]] xs = [g];
+    int r = g[1];
+    while (r>0) {
+        g = _gcd(y, r);
+        y = r;
+        r = g[1];
+        xs+=[g];
+        }
+    // println(xs);
+    Figures fs = [z[0]|z<-xs];
+    fs = intercalate(move(), fs);
+    return grid(figArray=[fs]);
+    }
+ 
+ void tgcd(int x, int y) = render(gcd(x, y));
+ 
+
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 public list[list[Figure]] figures(bool tooltip) = 
 [
               [demo1(), demo2()]
-             ,[demo3() , demo4()]
+             ,[demo3(), demo4()]
              ,[demo5(), demo6()]
              ,[demo7(), demo8()]
-             , [demo9(), demo10()]          
-            ,[demo15(), demo13()]
-            ,[demo14(),demo11()]
-            ,[demo16(), demo17()]
-            ,[demo18(), demo19()]
-            ,[tetris(), box(fig=shrink(false), size=<400, 400>)]
-            ,[steden2(tooltip=tooltip), steden3(tooltip=tooltip)]
+             ,[demo9(), demo10()]          
+             ,[demo15(), demo13()]
+             ,[demo14(), demo11()]
+             ,[demo16(), demo17()]
+             ,[demo18(), demo19()]
+             ,[tetris(), box(fig=shrink(false), size=<400, 400>)]
+             ,[steden2(tooltip=tooltip), steden3(tooltip=tooltip)]
             ,[decision(), triangle()]
             ];
             
  public list[Figure] packList() = [
      pack([demo1(), demo2(), demo3() , demo4(), demo5(), demo6(), demo7() ,demo8()])
-     ,pack([demo9(), demo10(), demo15() , demo13(), demo18(), demo19()])
-     ,pack([demo14(), demo11(), demo16() , demo17(), tetris(), box(fig=shrink(false), size=<400, 400>),decision(), triangle()
-    , steden2(), steden3()])
+     ,pack([demo9(), demo10(), demo15() , demo13(), demo18(), demo19(), gcd(1071, 462)])
+    ,pack([demo14(), demo11(), demo16() , demo17(), tetris(), box(fig=shrink(false), size=<400, 400>),decision(), triangle()
+    , steden2(), steden3(),pck()])
      ];
             
 Figure demoFig() = grid(vgap=4, figArray=figures(false));

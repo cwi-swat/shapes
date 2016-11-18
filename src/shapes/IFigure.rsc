@@ -83,7 +83,7 @@ public map[str, tuple[str, str]] dialog = ();
 
 public map[str, list[IFigure] ] defs = ();
 
-list[IFigure] fig = [];
+list[IFigure] currentFigs = [];
 
 int upperBound = 99999;
 int lowerBound = 2;
@@ -122,7 +122,8 @@ bool isPassive(Figure f) = f.event==noEvent()  && isEmptyTooltip(f.tooltip) && f
 str child(str id1) {
     if (findFirst(id1,"#") < 1) return id1;
     list[str] s = split("#", id1);
-    IFigure z = iemptyFigure(0);    
+    IFigure z = iemptyFigure(0);  
+    for (IFigure fig<-currentFigs) {  
     top-down visit(fig) {
         case IFigure g:ifigure(str id ,_): {
              if (id == s[0])  z = g;
@@ -134,6 +135,7 @@ str child(str id1) {
                  z = childq[v];
                  }          
               } 
+      }
     return z.id;
     }
     
@@ -213,7 +215,7 @@ void addState(Figure f) {
       
 public void clearWidget() { 
     println("clearWidget");
-    fig = [];
+    currentFigs = [];
     widget = (); widgetOrder = [];adjust=[]; googleChart=[]; loadCalls = []; graphs= [];
     markerScript = [];
     defs=(); 
@@ -375,7 +377,7 @@ str getIntro() {
         '  <for (d<-markerScript) {> <d> <}>
         '  <for (d<-widgetOrder) {> <widget[d].script> <}>
         '  <for (d<-reverse(adjust)) {> <d> <}>
-        '  <_display?"doFunction(\"load\", \"figureArea\")()":"\"\"">; 
+        '  <for (int d<-[0..size(currentFigs)]) {> <_display?"doFunction(\"load\", \"figureArea<d>\")();":""><}>; 
         '  <for (d<-graphs) {> <d> <}>  
         '  <for (d<-panels) {> adjust_panel(\"<getParentFig(d.id).id>\",\"<d.id>\", <getAtX(d)>, <getAtY(d)>); <}> 
         '  <for (d<-tooltips) {> adjust_tooltip(\"<getParentFig(d.id).id>\",\"<d.id>\", <getAtX(d)>, <getAtY(d)>); <}> 
@@ -388,7 +390,7 @@ str getIntro() {
        '\</script\>
        '\</head\>
        '\<body\>
-       '<visitFig(fig)>
+       '<visitFig(currentFigs)>
        '<visitTooltipFigs()>    
        '\</body\>     
 		'\</html\>\n";
@@ -674,7 +676,7 @@ public void _render(str id, IFigure fig1, int width = 800, int height = 800,
       
        widgetOrder += id;
     adjust+=  "adjustTableW("+figCalls([fig1])+", \"<id>\", 0,  0, 0, 0, 0);\n";
-    fig += [ifigure(id, [fig1])];
+    currentFigs += [ifigure(id, [fig1])];
     // println("site=<site>");
     cssLocation = cssFile;
 }
@@ -927,6 +929,7 @@ str text(str v, bool html) {
     }
     
 str on(Figure f) {
+    if (!_display) return "";
     list[str] events = getEvents(f.event) + getEvent(f.event);
     // println("HELP: <events>");
     if (indexOf(events, "load")>=0) loadCalls+=f.id;
@@ -936,7 +939,7 @@ str on(Figure f) {
    
         
 str on(str ev, str proc) {
-    if (isEmpty(ev)|| ev=="load") return "";
+    if (!_display||isEmpty(ev)|| ev=="load") return "";
     return ".on(\"<ev>\", <proc>)";
     }
          
