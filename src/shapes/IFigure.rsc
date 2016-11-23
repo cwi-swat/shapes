@@ -144,7 +144,17 @@ map[str, value] toMap(DDD p)  {
      if (!isEmpty(p.children))
         m["children"] = [toMap(x)|DDD x <- p.children];
      return m;
-     }    
+     } 
+     
+str clipPath(str id, list[str] cs) {
+    if (isEmpty(cs)) return "";
+    str r = "\<defs\>\<clipPath id=\"<id>\"\>";
+    for (str c<-cs) {
+         r+=c;
+         }
+    r+= "\</clipPath\>\</defs\>";
+    return r;
+    }   
      
     
 map[str, str] _getIdFig(Figure f) = extraGraphData[f.id];
@@ -670,12 +680,12 @@ public void _render(str id, IFigure fig1, int width = 800, int height = 800,
         '<style("border-color",borderColor)>
         '<style("background", fillColor)>
         ; 
-        'adjustTable(\"<id>\", <figCalls([fig1])>);       
+        'adjustTableFromCells(\"<id>\", <figCalls([fig1])>);       
         "
        , width, height, 0, 0, 1, 1, align,  align , 1, "", false, false >;
       
        widgetOrder += id;
-    adjust+=  "adjustTableW("+figCalls([fig1])+", \"<id>\", 0,  0, 0, 0, 0);\n";
+    adjust+=  "adjustHcatCells("+figCalls([fig1])+", \"<id>\", 0,  0, 0, 0, 0);\n";
     currentFigs += [ifigure(id, [fig1])];
     // println("site=<site>");
     cssLocation = cssFile;
@@ -1414,13 +1424,11 @@ bool hasInnerCircle(Figure f)  {
          
  IFigure _rect(str id, bool fo, Figure f,  IFigure fig = iemptyFigure(0)) {   
       int lw = getLineWidth(f);  
-      // if (getAtX(fig)>0 || getAtY(fig)>0) f.align = topLeft
       if (emptyFigure():=f.fig) fo = false;
-      // Alignment align = isAlign(getAlign(fig))?getAlign(fig):f.align;
       Alignment align = f.align;
       str begintag= 
          "
-         '\<svg  xmlns = \'http://www.w3.org/2000/svg\'  id=\"<id>_svg\"\> <beginScale(f)> <beginRotate(f)>
+         '\<svg  xmlns = \'http://www.w3.org/2000/svg\'  id=\"<id>_svg\" \> <clipPath("clip_<id>", f.clipPath)> <beginScale(f)> <beginRotate(f)>
          '\<rect id=\"<id>\" /\> 
          '<beginTag("<id>", fo, fig, align, lw)>
          "; 
@@ -1437,6 +1445,7 @@ bool hasInnerCircle(Figure f)  {
         '<attr("x", lw/2)><attr("y", lw/2)> 
         '<attr("rx", f.rounded[0])><attr("ry", f.rounded[1])> 
         '<attr("width", width)><attr("height", height)>
+        '<if (!isEmpty(f.clipPath)) {><style("clip-path", "url(#clip_<id>)")><}>
         '<styleInsideSvg(id, f, fig)>
         ",toInt(f.bigger*f.width), toInt(f.bigger*f.height), getAtX(f), getAtY(f), f.hshrink, f.vshrink, f.align, f.cellAlign, 
           toInt(f.bigger*getLineWidth(f)), getLineColor(f), f.sizeFromParent, true>;
@@ -1461,12 +1470,13 @@ bool hasInnerCircle(Figure f)  {
                  replaceAll(replaceAll(s,"\n", "\\n"),"\"","\\\"") +"\")";
             }  
       int lw =  getLineWidth(f);
+      // println("lw=<lw>");
       int width = f.width;
       int height = f.height;
       if (width>=0) width = toInt(f.bigger*(width + lw));
       if (height>=0) height = toInt(f.bigger*(height + lw));
       return " 
-        '<style("stroke-width",lw)>
+        '<if(path(_,_,_,_)!:=f){><style("stroke-width",lw)><}>
         '<style("stroke","<getLineColor(f)>")>
         '<style("fill", "<getFillColor(f)>")> 
         '<style("stroke-dasharray", lineDashing(f.lineDashing))> 
@@ -1606,7 +1616,7 @@ num rescale(num d, Rescale s) = s[1][0] + (d-s[0][0])*(s[1][1]-s[1][0])/(s[0][1]
 str toP(num d, Rescale s) {
         num e = rescale(d, s);
         num v = abs(e);
-        return "<toInt(e)>.<toInt(v*10)%10><toInt(v*100)%10><toInt(v*1000)%10>";
+        return "<e<0?"-":""><toInt(v)>.<toInt(v*10)%10><toInt(v*100)%10><toInt(v*1000)%10>";
         }
         
 str toP(num d) {
@@ -1754,6 +1764,39 @@ IFigure _pack(str id, Figure f, IFigure fig1...) {
          , f.sizeFromParent, true >;
        widgetOrder+= id;
        return ifigure(id, fig1);
+       }
+       
+IFigure _path(str id, Figure f,  IFigure fig = iemptyFigure(0)) {
+       if (path(num scale, num x, num y, list[str] d):= f) {
+          if (isEmpty(getFillColor(f))) f.fillColor= "white";
+          num lw = f.lineWidth<0?1:f.lineWidth;
+          f.lineWidth = -1;
+          str begintag = "";
+          begintag+=
+             "\<svg id=\"<id>_svg\"\><visitDefs(id, true)><beginRotate(f)>\<path id=\"<id>\"/\>       
+           ";
+          str endtag="<endRotate(f)>"; 
+          endtag += "\</svg\>"; 
+          widget[id] = <getCallback(f.event), seq, id, begintag, endtag, 
+          "
+          'd3.select(\"#<id>\")
+          '<on(getEvent(f.event), "doFunction(\"<id>\")")>
+          '<attr("d", intercalate(",", d))> 
+          '<style("marker-start", mS(f.startMarker, "url(#m_<id>_start)"))>
+          '<style("marker-mid", mS(f.midMarker, "url(#m_<id>_mid)"))>
+          '<style("marker-end",  mS(f.endMarker,"url(#m_<id>_end)"))>
+          '<style("fill-rule", f.fillEvenOdd?"evenodd":"nonzero")>
+          '<if(lw>=0){><style("stroke-width", lw/scale)><}>
+          '<attr("width",  f.width)><attr("height",  f.height)>
+          '// <attr("vector-effect", "non-scaling-stroke")>
+          '<attr("transform", "translate(<x>, <y>) scale(<scale>)")>
+          '<styleInsideSvgOverlay(id, f)>
+          ",f.width, f.height, getAtX(f), getAtY(f), f.hshrink, f.vshrink, f.align, f.cellAlign,  getLineWidth(f), getLineColor(f)
+          ,f.sizeFromParent, true >;
+          addState(f);
+          widgetOrder+= id;
+          }
+       return ifigure(id, [fig]);
        }
        
 IFigure _shape(str id, Figure f,  IFigure fig = iemptyFigure(0)) {
@@ -2177,13 +2220,13 @@ IFigure _hcat(str id, Figure f, bool addSvgTag, IFigure fig1...) {
         '<style("visibility", getVisibility(f))>
         '<attr("pointer-events","none")>
         '<_padding(f.padding)>;
-        'adjustTable(\"<id>\", <figCalls(fig1)>)    
+        'adjustTableFromCells(\"<id>\", <figCalls(fig1)>)    
         ;   
         "
         , width, height, getAtX(f), getAtY(f), f.hshrink, f.vshrink, f.align, f.cellAlign,  getLineWidth(f), getLineColor(f)
         , f.sizeFromParent, false >;
        addState(f);
-       adjust+=  "adjustTableW("+figCalls(fig1)+", \"<id>\", <getLineWidth(f)<0?0:-getLineWidth(f)>, 
+       adjust+=  "adjustHcatCells("+figCalls(fig1)+", \"<id>\", <getLineWidth(f)<0?0:-getLineWidth(f)>, 
                <-hPadding(f)>, <-vPadding(f)>,<f.hgap>, <f.vgap>);\n";
        IFigure r =  ifigure(id ,[td("<id>_<getSeq(g)>", f, g)| g<-fig1]);
        widgetOrder+= id;
@@ -2267,12 +2310,12 @@ IFigure _vcat(str id, Figure f,  bool addSvgTag, IFigure fig1...) {
         'd3.select(\"#<id>_fo\")<attr("pointer-events", "none")>;
         'd3.select(\"#<id>_svg\")<attr("pointer-events", "none")>;
         'd3.select(\"#<id>_rect\")<attr("pointer-events", "none")>;
-        'adjustTable(\"<id>\", <figCalls(fig1)>); 
+        'adjustTableFromCells(\"<id>\", <figCalls(fig1)>); 
         ", width, height, getAtX(f), getAtY(f), f.hshrink, f.vshrink, f.align, f.cellAlign,  getLineWidth(f), getLineColor(f)
          , f.sizeFromParent, false >;
        
        addState(f);
-       adjust+=  "adjustTableH("+figCalls(fig1)+", \"<id>\", <getLineWidth(f)<0?0:-getLineWidth(f)>, 
+       adjust+=  "adjustVcatCells("+figCalls(fig1)+", \"<id>\", <getLineWidth(f)<0?0:-getLineWidth(f)>, 
           <-hPadding(f)>, <-vPadding(f)>,<f.hgap>, <f.vgap>);\n"; 
        IFigure r = ifigure(id, [td("<id>_<getSeq(g)>", f, g,   tr = true)| g<-fig1]);
        widgetOrder+= id;
@@ -2329,12 +2372,12 @@ IFigure _grid(str id, Figure f,  bool addSvgTag, list[list[IFigure]] figArray=[[
 		 'd3.select(\"#<id>_fo\")<attr("pointer-events", "none")>;
          'd3.select(\"#<id>_svg\")<attr("pointer-events", "none")>;
          'd3.select(\"#<id>_rect\")<attr("pointer-events", "none")>;
-         'adjustTableWH1(\"<id>\", <figCallArray(figArray)>);  
+         'adjustGridTableFromCells(\"<id>\", <figCallArray(figArray)>);  
         ", f.width, f.height, getAtX(f), getAtY(f), f.hshrink, f.vshrink, f.align, f.cellAlign,  getLineWidth(f), getLineColor(f)
          , f.sizeFromParent, false >;      
        addState(f);
        list[tuple[list[IFigure] f, int idx]] fig1 = [<figArray[i], i>|int i<-[0..size(figArray)]];
-       adjust+=  "adjustTableWH(<figCallArray(figArray)>, \"<id>\", <-getLineWidth(f)>, 
+       adjust+=  "adjustGridCells(<figCallArray(figArray)>, \"<id>\", <-getLineWidth(f)>, 
          <-hPadding(f)>, <-vPadding(f)>,<f.hgap>, <f.vgap>);\n";
        IFigure r = ifigure(id, [tr("<id>_r", f, f.width, f.height, g.f ) | g<-fig1]);
        widgetOrder+= id;
@@ -2716,7 +2759,9 @@ IFigure _translate(Figure f,  bool addSvgTag = false,
     v = f.panel;
     if (Figure g:=v && emptyFigure()!=g) {panels +=  _translate(g, addSvgTag=true); }
     switch(f) {   
-        case box(): return _rect(f.id, true, f, fig = _translate(f.fig,  inHtml = true));
+        case box(): {
+                  return _rect(f.id, true, f, fig = _translate(f.fig,  inHtml = true));
+                  }
         case emptyFigure(): return iemptyFigure(f.seq);
         case ellipse():  return _ellipse(f.id, true, f, fig = 
              _translate(f.fig)
@@ -2729,6 +2774,12 @@ IFigure _translate(Figure f,  bool addSvgTag = false,
                        addMarker(f, "<f.id>_mid", f.midMarker);
                        addMarker(f, "<f.id>_end", f.endMarker);
                        return _shape(f.id, f);
+                       }
+        case path(num _, num _, num _, list[str] _):  {
+                       addMarker(f, "<f.id>_start", f.startMarker);
+                       addMarker(f, "<f.id>_mid", f.midMarker);
+                       addMarker(f, "<f.id>_end", f.endMarker);
+                       return _path(f.id, f);
                        }
         case ngon():  return _ngon(f.id, true, f, fig = _translate(f.fig,  inHtml=true));
         case htmlText(value s): {if (str t:=s) return _text(f.id, inHtml, f, t, f.overflow, addSvgTag);

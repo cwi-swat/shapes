@@ -623,3 +623,44 @@ void tbtest() = render(btest());
 void fbtest(loc l) = writeFile(l, toHtmlString(btest())); 
  
 
+Figure star() = rotateDeg(45, 200, 200, overlay(lineWidth=0, figs=
+                  [
+                  // circle(cx=100, cy = 100, r= 100, fillColor="red")
+                  box(size=<400, 400>, fillColor="red")
+                  ,box(size=<400, 400>, fillColor="white", clipPath=[
+                      clip.circle(200, 0, 0)
+                      ,clip.circle(200, 400, 400)
+                      ,clip.circle(200, 0, 400)
+                      ,clip.circle(200, 400, 0)
+                      ,clip.rect(150, 150, 100, 100)
+                      ])
+                  ]
+           ));
+  
+void tstar() = render(star());  
+
+void fstar(loc l) = writeFile(l, toHtmlString(star()));   
+
+Figure ppath() {
+       int n = 20;
+       delta = 0.0001;
+       return path(50, 100, 100
+            ,
+            [p_.M(0, 0)]+[p_.L(t-sin(t), 1-cos(t))|t<-[2*PI()/n, 4*PI()/n.. 2*PI()+delta]]
+            +
+            [p_.M(0, 0)]+[p_.L(t-sin(t), -(1-cos(t)))|t<-[2*PI()/n, 4*PI()/n.. 2*PI()+delta]]
+            ,
+            size=<800, 800>, lineColor="red", lineWidth=1, fillColor="antiqueWhite");
+       }
+       
+void tpath() = render(ppath());  
+
+void fpath(loc l) = writeFile(l, toHtmlString(ppath()));   
+     
+Figure bigg1(int bigg) = box(size=<100, 100>, bigger=  bigg, fig = box(shrink=0.5, fillColor="antiquewhite")); 
+
+Figure bigger() = hcat(figs=[bigg1(1), bigg1(2)]); 
+
+void tbigger() = render(bigger());  
+
+void fbigger(loc l) = writeFile(l, toHtmlString(bigger()));   

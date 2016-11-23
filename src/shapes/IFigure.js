@@ -488,7 +488,7 @@ function translatePoints(angle, n, r, x, y) {
 	return q;
 }
 
-function adjust1(fromId, f, width, height) {
+function adjustClient(fromId, f, width, height) {
 	if (f.id == "emptyFigure")
 		return;
 	return _adjust(f.id, fromId, f.hshrink, f.vshrink, f.lw, f.n, f.angle, 0,
@@ -709,7 +709,7 @@ function adjustTd(to, from) {
 	}
 }
 
-function adjustTable(id1, clients) {
+function adjustTableFromCells(id1, clients) {
 	// From inner to outer
 	var aUndefW = clients.filter(undefW);
 	var width = d3.select("#" + id1).attr("w");
@@ -746,7 +746,7 @@ function adjustTable(id1, clients) {
 			"height", "" + (height+y+lw*(clients.length)) + "px");
 }
 
-function adjustTableWH1(id1, clients) {
+function adjustGridTableFromCells(id1, clients) {
 	// From inner to outer
 	var aUndefW = clients.filter(function(i) {
 		return i.filter(undefW).length != 0;
@@ -798,7 +798,7 @@ function adjustOverlay(clients, id1, lw, hpad, vpad) {
 		var h = parseInt(height);
 		// alert(aUndefWH.length);
 		for (var i = 0; i < aUndefWH.length; i++) {
-			adjust1(id1, aUndefWH[i], w, h);
+			adjustClient(id1, aUndefWH[i], w, h);
 		}
 	} else {
 		width = 0;
@@ -890,7 +890,7 @@ function yAlign(align, height, h) {
 	 }
 }
 
-function adjustTableW(clients, from, lw, hpad, vpad, hgap, vgap) {
+function adjustHcatCells(clients, from, lw, hpad, vpad, hgap, vgap) {
 	var c = d3.select("#" + from);
 	var width = c.attr("w");
 	var height = c.attr("h");
@@ -903,15 +903,15 @@ function adjustTableW(clients, from, lw, hpad, vpad, hgap, vgap) {
 	var w = (width - sDefW) / nW;
 	var h = parseInt(height);
 	for (var i = 0; i < aUndefW.length; i++) {
-		adjust1(from, aUndefW[i], w, h);
+		adjustClient(from, aUndefW[i], w, h);
 	}
 	var aUndefH = clients.filter(undefH);
 	for (var i = 0; i < aUndefH.length; i++) {
-		adjust1(from, aUndefH[i], w, h);
+		adjustClient(from, aUndefH[i], w, h);
 	}
 }
 
-function adjustTableH(clients, from, lw, hpad, vpad, hgap, vgap) {
+function adjustVcatCells(clients, from, lw, hpad, vpad, hgap, vgap) {
 	
 	var c = d3.select("#" + from);
 	var width = c.attr("w");
@@ -928,11 +928,11 @@ function adjustTableH(clients, from, lw, hpad, vpad, hgap, vgap) {
 	var h = (height - sDefH) / nH;
 	var w = parseInt(width);
 	for (var i = 0; i < aUndefH.length; i++) {
-		adjust1(from, aUndefH[i], w, h);
+		adjustClient(from, aUndefH[i], w, h);
 	}
 	var aUndefW = clients.filter(undefW);
 	for (var i = 0; i < aUndefW.length; i++) {
-		adjust1(from, aUndefW[i], w, h);
+		adjustClient(from, aUndefW[i], w, h);
 	}
 }
 
@@ -962,11 +962,11 @@ function transpose(original) {
 	return copy;
 }
 
-function adjustTableWH(clients, id1, lw, hpad, vpad, hgap, vgap) {
+function adjustGridCells(clients, id1, lw, hpad, vpad, hgap, vgap) {
 	// From  outer to inner figures
-	var c = d3.select("#" + id1);
-	var width = c.attr("w");
-	var height = c.attr("h");
+	var from = d3.select("#" + id1);
+	var width = from.attr("w");
+	var height = from.attr("h");
 	if (invalid(width) || invalid(height))
 		return;
 	width = parseInt(width) - hgap * clients.length-lw;
@@ -1012,7 +1012,7 @@ function adjustTableWH(clients, id1, lw, hpad, vpad, hgap, vgap) {
 		      var h1 = q.empty()?null:q.style("height");
 		      if (h1!=null && h1!="auto") h = parseInt(h1);
 		   }
-		   adjust1(id1, aUndefWH[i][j], w, h);
+		   adjustClient(id1, aUndefWH[i][j], w, h);
 		}
 	}
 }

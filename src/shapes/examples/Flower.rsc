@@ -25,7 +25,7 @@ Figure flower() {
     int n  = 16;
     int r = 40;
     list[Figure] fs = 
-    [atXY(r+toInt(r*sin(p)), r+toInt(r*cos(p)), leaf(45-toInt((180*p)/PI())))|p<-[0,2*PI()/n..2*PI()]]
+    [atXY(r+toInt(r*sin(p)), r+toInt(r*cos(p)), leaf(45-toInt((180*p)/PI())))|real p<-[0,2*PI()/n..2*PI()]]
     +atXY(25, 25, box(lineWidth =0, size=<2*r, 2*r>, align = centerMid, lineColor="none", fillColor="none", fig=circle(r=0.6*r
     , fillColor = "yellow", fillOpacity=0.7, fig = circle(r=0.1*r, lineColor="none", fillColor="green"))))
     ;

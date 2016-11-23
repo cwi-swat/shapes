@@ -208,6 +208,7 @@ public data Figure(
 		str fillColor    = "none", 			
 		real fillOpacity = -1.0,	
 		str fillRule     = "evenodd",
+		list[str] clipPath = [],
 		
 		tuple[int, int] rounded = <0, 0>,
 
@@ -291,8 +292,14 @@ public data Figure(
    			Rescale scaleX = <<0,1>, <0, 1>>,
    			Rescale scaleY = <<0,1>, <0, 1>>,
    			Figure startMarker=emptyFigure(),
+   			Figure midMarker=emptyFigure(),
+   			Figure endMarker=emptyFigure()) 
+   	| path(num scale, num xp, num yp, list[str] d, 				// Arbitrary shape
+    	// Connect vertices with line/curve
+   			bool fillEvenOdd = true,		
+   			Figure startMarker=emptyFigure(),
    			Figure midMarker=emptyFigure(), 
-   			Figure endMarker=emptyFigure())
+   			Figure endMarker=emptyFigure())	
    
    | image(str src="")
 
@@ -924,5 +931,54 @@ public DDD fileMap(loc source, str suffix) {
  public Figures intercalate(Figure sep, Figures l) = 
 	(isEmpty(l)) ? [] : ( head(l) | it + [sep]+[x]| x <- tail(l) );
      
-     
+   
+alias Clip = tuple[str(int x, int y, int w, int h) rect, str(int cx, int cy, int r) circle, str(list[str]) path] ;
+
+alias Path = tuple[
+             str(num x, num y) M, str(num x, num y) m, str(num x, num y) L, str(num x, num y) l,
+             str(num cx1, num cy1, num cx2, num cy2, num x, num y) C, str(num cx1, num cy1, num cx2, num cy2, num x, num y) c,
+             str(num cx, num cy, num x, num y) S, str(num cx, num cy, num x, num y) s, str() Z];
+
+public Clip clip= <
+           str(num x, num y, num w, num h) {
+              return "\<rect x=\"<x>\" y=\"<y>\"  width=\"<w>\" height=\"<h>\" /\>";
+           }
+           ,
+           str(num r, num cx, num cy) {
+              return "\<circle r=\"<r>\" cx=\"<cx>\" cy=\"<cy>\" /\>";
+           }
+           ,
+           str(list[str] p) {
+                return "\<path d=\"<intercalate(",", p) >\" /\>";
+               }
+           >;
+           
+ str toP(num d) {
+        num v = abs(d);
+        return "<d<0?"-":""><toInt(v)>.<toInt(v*10)%10><toInt(v*100)%10><toInt(v*1000)%10>";
+        }
+  
+ public Path p_ = <
+                      str(num x, num y) {return "M <toP(x)> <toP(y)>";}
+                      ,
+                      str(num x, num y) {return "m <toP(x)> <toP(y)>";}
+                      ,
+                      str(num x, num y) {return "L <toP(x)> <toP(y)>";}
+                      ,
+                      str(num x, num y) {return "l <toP(x)> <toP(y)>";}
+                      ,
+                      str(num cx1, num cy1, num cx2, num cy2, num x, num y) {
+                           return "C <toP(cx1)> <toP(cy1)> <toP(cx2)> <toP(cy2)> <toP(x)> <toP(y)>";
+                           }
+                      ,
+                      str(num cx1, num cy1, num cx2, num cy2, num x, num y) {
+                           return "c <toP(cx1)> <toP(cy1)> <toP(cx2)> <toP(cy2)> <toP(x)> <toP(y)>";
+                           }
+                      ,
+                      str(num cx, num cy, num x, num y) {return "S <toP(cx)> <toP(cy)> <toP(x)> <toP(y)>";}
+                      ,
+                      str(num cx, num cy,  num x, num y) {return "s <toP(cx)> <toP(cy)> <toP(x)> <toP(y)>";}
+                      ,
+                      str() {return " Z";}
+                     >;       
      
