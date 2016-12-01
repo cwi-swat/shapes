@@ -294,7 +294,7 @@ public data Figure(
    			Figure startMarker=emptyFigure(),
    			Figure midMarker=emptyFigure(),
    			Figure endMarker=emptyFigure()) 
-   	| path(num scale, num xp, num yp, list[str] d, 				// Arbitrary shape
+   	| path(str transform, num scale, num xp, num yp, list[str] d, 				// Arbitrary shape
     	// Connect vertices with line/curve
    			bool fillEvenOdd = true,		
    			Figure startMarker=emptyFigure(),
@@ -937,7 +937,14 @@ alias Clip = tuple[str(int x, int y, int w, int h) rect, str(int cx, int cy, int
 alias Path = tuple[
              str(num x, num y) M, str(num x, num y) m, str(num x, num y) L, str(num x, num y) l,
              str(num cx1, num cy1, num cx2, num cy2, num x, num y) C, str(num cx1, num cy1, num cx2, num cy2, num x, num y) c,
-             str(num cx, num cy, num x, num y) S, str(num cx, num cy, num x, num y) s, str() Z];
+             str(num cx, num cy, num x, num y) S, str(num cx, num cy, num x, num y) s, str() Z,
+             str(num r) dot]
+             ;
+             
+alias Transform = tuple[str(num x, num y) t // translate
+                       ,str(num s) s//scale
+                       ,str(num phi, num x, num y) r//rotate in radians
+                       ]; 
 
 public Clip clip= <
            str(num x, num y, num w, num h) {
@@ -953,10 +960,14 @@ public Clip clip= <
                }
            >;
            
+    
+           
  str toP(num d) {
         num v = abs(d);
         return "<d<0?"-":""><toInt(v)>.<toInt(v*10)%10><toInt(v*100)%10><toInt(v*1000)%10>";
+        //<toInt(v*10000)%10>
         }
+ // a <toP(r)> <toP(r)> 0 0 0 <toP(-2*r)> 0      
   
  public Path p_ = <
                       str(num x, num y) {return "M <toP(x)> <toP(y)>";}
@@ -980,5 +991,18 @@ public Clip clip= <
                       str(num cx, num cy,  num x, num y) {return "s <toP(cx)> <toP(cy)> <toP(x)> <toP(y)>";}
                       ,
                       str() {return " Z";}
-                     >;       
+                      ,
+                      str(num r) { return "m <toP(  -r)> 0 a <toP(r)> <toP(r)> 0 1 0 <toP( 2*r)>  0"
+                                                         +"a <toP(r)> <toP(r)> 0 1 0 <toP(-2*r)>  0"              
+                                                        ;}
+                     >;    
+                     
+ public Transform t_ = <
+                         str(num x, num y) {return "translate(<toP(x)>, <toP(y)>)";}
+                         ,
+                         str(num s) {return "scale(<toP(s)>)";}
+                         ,
+                         str(num phi, num x, num y) {return "rotate(<toP(phi*180/PI())>,<toP(x)>, <toP(y)>)";}                 
+                       >;
+                          
      

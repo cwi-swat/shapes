@@ -505,6 +505,7 @@ function _adjust(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y, width,
 	var h = Math.ceil(height * vshrink);
 	var  invalidW = invalid(to.attr("width"))&&invalid(to.attr("w"));
 	var  invalidH = invalid(to.attr("height"))&&invalid(to.attr("h"));
+	// alert(""+to.attr("width")+" "+ to.style("width")+" "+to.attr("w")+" "+to.node().nodeName);
 	switch (to.node().nodeName) {
 	case "FORM":
 	case "INPUT":
@@ -513,6 +514,9 @@ function _adjust(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y, width,
 		if (invalidW && invalid(to.style("width"))) to.attr("w", w).style("width", w);	
 		if (invalidH && invalid(to.style("height"))) to.attr("h", h).style("height", h);
 		break;
+	//case "g" :
+	//	 to.attr("width", w).attr("height", h);
+	//	 break;
 	case "rect":
 		if (invalidW) to.attr("width", w);
 		if (invalidH) to.attr("height", h);
@@ -615,8 +619,9 @@ function getVal(f, key) {
 		d = d3.select("#" + f.id + "_svg");
 		if (!d.empty()) {
 			var r = d.attr(key);
-			if (r != null)
-				return r;
+			if (r != null) {
+				return (parseInt(r) < upperBound)?r:null;
+			    }
 			d = d3.select("#" + f.id);
 			r = d.attr(key);
 			if (r!=null) return (parseInt(r) < upperBound)?r:null;
@@ -778,29 +783,7 @@ function adjustGridTableFromCells(id1, clients) {
 	// alert("adjustTableWH1:"+width);
 }
 
-function adjustOverlay(clients, id1, lw, hpad, vpad) {
-	// alert("adjust");
-	var c = d3.select("#" + id1);
-	var width = c.attr("width");
-	var height = c.attr("height");
-	if (invalid(width) || invalid(height)) {
-		c = d3.select("#" + id1 + "_svg");
-		if (!c.empty()) {
-			width = c.attr("width");
-			height = c.attr("height");
-		} else
-			return;
-	}
-	// alert(width);
-	if (!invalid(width) && !invalid(height)) {
-		var aUndefWH = clients.filter(undefWH);
-		var w = parseInt(width);
-		var h = parseInt(height);
-		// alert(aUndefWH.length);
-		for (var i = 0; i < aUndefWH.length; i++) {
-			adjustClient(id1, aUndefWH[i], w, h);
-		}
-	} else {
+function adjustOverlayFromCells(clients, id1, lw, hpad, vpad) {
 		width = 0;
 		height = 0;
 		var isEmpty = false;
@@ -825,7 +808,6 @@ function adjustOverlay(clients, id1, lw, hpad, vpad) {
 			c = d3.select("#" + id1 + "_svg");
 			c.attr("width", width).attr("height", height);
 		}
-	}
 	for (var i = 0; i < clients.length; i++) {
 		var e = d3.select("#" + clients[i].id + "_svg");
 		if (!e.empty()) {
@@ -849,11 +831,36 @@ function adjustOverlay(clients, id1, lw, hpad, vpad) {
 			        }
 			   else e.attr("y", y);
 		       }    
-		   // alert(clients);   
-		   
-		   
+		   // alert(clients);      	   
 		}
 	}
+}
+	
+
+function adjustOverlayCells(clients, id1, lw, hpad, vpad) {
+	// alert("adjust");
+	var c = d3.select("#" + id1);
+	var width = c.attr("width");
+	var height = c.attr("height");
+	if (invalid(width) || invalid(height)) {
+		c = d3.select("#" + id1 + "_svg");
+		if (!c.empty()) {
+			width = c.attr("width");
+			height = c.attr("height");
+		} else
+			return;
+	}
+	// alert(width);
+	if (!invalid(width) && !invalid(height)) {
+		var aUndefWH = clients.filter(undefWH);
+		var w = parseInt(width);
+		var h = parseInt(height);
+		// alert(aUndefWH.length);
+		// alert(""+id1+" "+width+" "+aUndefWH.length+" "+clients.length);
+		for (var i = 0; i < aUndefWH.length; i++) {
+			adjustClient(id1, aUndefWH[i], w, h);
+		}
+	} 
 }
 
 function xAlign(align, width, w) {
@@ -1017,9 +1024,10 @@ function adjustGridCells(clients, id1, lw, hpad, vpad, hgap, vgap) {
 	}
 }
 
-function adjustFrame(id0, width, height) {
+function adjustOverlay(id0, width, height) {
 	d3.select("#" + id0).attr("width", width).attr("height", height);
 	d3.select("#" + id0 + "_fo_table").attr("w", width).attr("h", height);
+	d3.select("#" + id0 + "_fo_table").style("width", width).style("height", height);
 	d3.select("#" + id0 + "_fo").attr("width", width).attr("height", height);
 	d3.select("#" + id0 + "_svg").attr("width", width).attr("height", height);
 }

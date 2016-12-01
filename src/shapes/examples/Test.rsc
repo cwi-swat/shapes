@@ -178,8 +178,8 @@ public void fbundle(loc l) = writeFile(l, toHtmlString(
    bundle(), resizable=true
  )); 
  
-Figure base(int lineWidth, Alignment align, Figure fig = emptyFigure())  = box(lineWidth = 0, align = align, 
-                 fig = box(shrink = 0.44, lineWidth = lineWidth, lineColor = pickColor(),
+Figure base(int lineWidth, Alignment align, Figure fig = emptyFigure())  = box(lineWidth = 0, align = align, sizeFromParent= true,
+                 fig = box(shrink = 0.44, lineWidth = lineWidth, lineColor = pickColor(), 
                            fig = fig)
                  );
                  
@@ -204,8 +204,8 @@ Figure baseRec() { return base(4, fig = base(4, fig= base(4, fig= base(4)))
 void tbase() = render(baseRec(), size=<600, 600>);  
 
 public void fbase(loc l) = writeFile(l, toHtmlString(
-   baseRec()
- )); 
+   base(4, fig=base(4)), size=<600, 600>)
+ ); 
  
  Figure b(int w, int h) = box(grow=1.2, fig= box(size=<w, h>));
  
@@ -644,7 +644,7 @@ void fstar(loc l) = writeFile(l, toHtmlString(star()));
 Figure ppath() {
        int n = 20;
        delta = 0.0001;
-       return path(50, 100, 100
+       return path(t_.r(PI()/2, 1, 1), 50, 100, 100
             ,
             [p_.M(0, 0)]+[p_.L(t-sin(t), 1-cos(t))|t<-[2*PI()/n, 4*PI()/n.. 2*PI()+delta]]
             +
@@ -663,4 +663,181 @@ Figure bigger() = hcat(figs=[bigg1(1), bigg1(2)]);
 
 void tbigger() = render(bigger());  
 
-void fbigger(loc l) = writeFile(l, toHtmlString(bigger()));   
+void fbigger(loc l) = writeFile(l, toHtmlString(bigger()));  
+
+list[str] _baseTriangle(num alpha, num beta, num a, num b, num c) {
+     return [p_.M(0,0), p_.L(b*cos(alpha), b*sin(alpha)),p_.L(a,0), p_.Z()];    
+     } 
+     
+Figure dot(int x, int y, tuple[num, num] p, num r, tuple[num, num] c, str color) = path(t_.t(p[0], p[1]),  100, x, y,
+     [p_.M(c[0], c[1]), p_.dot(r)], fillColor=color, lineWidth=0);
+
+
+tuple[Figure, tuple[num, num], tuple[num, num], tuple[num, num]
+             ,tuple[num, num], tuple[num, num], tuple[num, num], list[tuple[num, num]]] 
+             baseTriangle(tuple[num, num] p, tuple[num, num, num] r, num a, num alpha, num beta) {
+           num b = a*sqrt(tan(beta)*tan(beta)+(tan(alpha)*tan(beta)*tan(alpha)*tan(beta)))/(tan(alpha)+tan(beta));
+           num c = sqrt(b*b-2*b*cos(alpha)+1);
+           int x  = 300; int y = 300;
+           tuple[num, num] nextA = <cos(beta)*c*0.5-sin(beta)*c*0.5*sqrt(3)+1+c, sin(beta)*c*0.5+cos(beta)*c*0.5*sqrt(3)>;
+           tuple[num, num] nextB = <cos(alpha)*b*0.5-sin(alpha)*b*0.5*sqrt(3)-1, sin(alpha)*b*0.5+cos(alpha)*b*0.5*sqrt(3)>;
+           tuple[num, num] nextC = <(-b*cos(alpha)+0.5*a), -(b*sin(alpha)+0.5*a*sqrt(3))>;
+           tuple[Figure, tuple[num, num]] triangleA =  _equi1(x, y, p, r, a, 0);
+           tuple[Figure, tuple[num, num]] triangleB =  _equi2(x, y, p, r, b, alpha);
+           tuple[Figure, tuple[num, num]] triangleC =  _equi3(x, y, p, r, c, beta);
+           
+           return <overlay(figs=[
+             //path(t_.t(p[0], p[1])+t_.r(r[0], r[1], r[2]), 100, x, y, _baseTriangle(alpha, beta, a, b, c), fillColor="yellow")
+             //    ,
+             
+                 triangleA[0]
+                 ,
+                 triangleB[0]
+                 ,
+                 triangleC[0]
+                 ,
+                 dot(x, y, p, 0.02, triangleA[1],"darkred")
+                 ,
+                 dot(x, y, p, 0.02, triangleB[1],"darkgreen")
+                 ,
+                 dot(x, y, p, 0.02, triangleC[1],"darkblue")
+                // ,
+                // dot(x, y, p, 0.03,  <0,0>, "brown")
+                 
+                 
+           ], size=<800, 800>), nextA, nextB, nextC, triangleA[1], triangleB[1], triangleC[1], []>;
+           }
+           
+tuple[num, num] posM(num phi, tuple[num, num] p, num a, num tx, bool flip) {
+      tuple[num, num] v = <0.5*a, (flip?(-a):a)/(2*sqrt(3))>;
+      return <cos(phi)*v[0]-sin(phi)*v[1]+tx, sin(phi)*v[0]+cos(phi)*v[1]>;   
+      }
+                 
+tuple[Figure, tuple[num, num]]  _equi1(int x, int y, tuple[num, num] p, tuple[num, num, num] r,num a, num phi) = <path(t_.t(p[0], p[1])+t_.r(r[0], r[1], r[2])+t_.r(phi, 0, 0), 100, x, y, [
+                                              p_.M(0,0), p_.L(a*0.5, -a*0.5*sqrt(3)), p_.L(a, 0), p_.Z()
+                                              ]
+    ,fillColor="lightblue"), posM(phi, p, a, 0, true)>;
+    
+    
+tuple[Figure, tuple[num, num]]  _equi2(int x, int y, tuple[num, num] p, tuple[num, num, num] r, num a, num phi) = <path(t_.t(p[0], p[1])+t_.r(r[0], r[1], r[2])+t_.r(phi, 0, 0), 100, x, y, [
+                                              p_.M(0,0), p_.L(a*0.5, a*0.5*sqrt(3)), p_.L(a, 0), p_.Z()
+                                              ]
+    ,fillColor="antiquewhite"), posM(phi, p, a,  0, false)>;
+    
+tuple[Figure, tuple[num, num]]  _equi3(int x, int y, tuple[num, num] p, tuple[num, num, num] r, num a, num phi) = <path(t_.t(p[0], p[1])+t_.r(r[0], r[1], r[2])+t_.t(1,0)+t_.r(phi, 0, 0), 100, x, y, [
+                                              p_.M(0,0), p_.L(a*0.5, a*0.5*sqrt(3)), p_.L(a, 0), p_.Z()
+                                              ]
+    ,fillColor="lightgrey"), posM(phi, p, a,  1, false)>;
+    
+
+list[Figure] translateFigure(tuple[num, num] t, num alpha, num beta, tuple[num, num] ca, tuple[num, num] cb, tuple[num, num] cc) {
+       list[Figure] r = [
+               baseTriangle(t, <0, ca[0], ca[1]>, 1, alpha, beta)[0]
+               // ,baseTriangle(t, <2*PI()/3, ca[0], ca[1]>, 1, PI()/6, PI()/3)[0]
+               // baseTriangle(t, <4*PI()/3, ca[0], ca[1]>, 1, PI()/6, PI()/3)[0]
+               //,baseTriangle(t, <2*PI()/3, cb[0], cb[1]>, 1, PI()/6, PI()/3)[0]
+               // baseTriangle(t, <4*PI()/3, cb[0], cb[1]>, 1, PI()/6, PI()/3)[0],
+               //,baseTriangle(t, <2*PI()/3, cc[0], cc[1]>, 1, PI()/6, PI()/3)[0]
+               //,baseTriangle(t, <4*PI()/3, cc[0], cc[1]>, 1, PI()/6, PI()/3)[0]       
+            ];
+       return r;
+    
+    }
+    
+tuple[num, num] m_(num k, tuple[num, num] x) = <k*x[0], k*x[1]>;
+
+tuple[num, num] m_(tuple[num, num] x, tuple[num, num] y) = <x[0]+y[0], x[1]+y[1]>;
+
+tuple[num, num] m_(num kx, num ky, tuple[num, num] x, tuple[num, num] y) = <kx*x[0]+ky*y[0], kx*x[1]+ky*y[1]>;
+
+tuple[num, num] m_(tuple[num, num] b, num kx, num ky, tuple[num, num] x, tuple[num, num] y) = <b[0]+kx*x[0]+ky*y[0], b[1]+kx*x[1]+ky*y[1]>;
+
+
+
+
+Figures stepFigure(tuple[num, num] pos, num alpha, num beta,
+        tuple[Figure, tuple[num, num], tuple[num, num], tuple[num, num]
+                 ,tuple[num, num], tuple[num, num], tuple[num, num], list[tuple[num, num]]
+                 ] r) =
+     translateFigure(pos, alpha, beta, r[4], r[5], r[6])
+     //+translateFigure(m_(kx, r[2]), r[4], r[5], r[6])
+     //+translateFigure(m_(kx, ky, r[3]), r[4], r[5], r[6])
+     ;
+ 
+                 
+Figure nap() {
+    num alpha = PI()/5, beta = PI()/3;
+    tuple[Figure, tuple[num, num], tuple[num, num], tuple[num, num]
+                 ,tuple[num, num], tuple[num, num], tuple[num, num]
+                 ,list[tuple[num, num]]
+                 ] 
+               r = baseTriangle(<0, 0>, <0, 0, 0>, 1, alpha, beta);
+               int low = -4, hi = 6;
+               // int low = -1, hi = 2;
+               list[tuple[num, num]] lattice = [*[m_(kx, ky, r[1], r[2])|kx<-[low..hi]]|ky<-[low..hi]];
+               tuple[num, num] r1 = r[1];
+               tuple[num, num] r2=  r[2];
+               list[tuple[tuple[num, num], tuple[num, num]]] arrows =
+                  [*[<m_(kx, ky, r1, r2), m_(kx+1, ky, r1, r2)> |kx<-[low..hi-1]]|ky<-[low..hi]]
+                  +
+                  [*[<m_(kx, ky, r1, r2), m_(kx, ky+1, r1, r2)> |kx<-[low..hi]]|ky<-[low..hi-1]]
+                  +
+                  [*[<m_(kx, ky, r1, r2), m_(kx+1, ky+1, r1, r2)> |kx<-[low..hi-1]]|ky<-[low..hi-1]]
+                  ;
+               tuple[num, num] r54= m_(r[5], m_(-1, r[4]));
+               tuple[num, num] r64= m_(r[6], m_(-1, r[4]));
+               tuple[num, num] r65= m_(r[6], m_(-1, r[5]));
+               //list[tuple[tuple[num, num], tuple[num, num]]] edges = [<r[4], m_(r[4], m_(2, r54))>, <r[4],r[6]>, <r[5], r[6]>
+               //];
+               int low2 = 3*low, hi2 = 2*hi;
+               list[tuple[tuple[num, num], tuple[num, num]]] edges =
+                  [*[<m_(r[4], kx, ky, r54, r64), m_(r[4], kx+1, ky, r54, r64)> |kx<-[low2..hi2-1]]|ky<-[low2..hi2]]
+                  +
+                  [*[<m_(r[4], kx, ky, r54, r64), m_(r[4], kx, ky+1, r54, r64)> |kx<-[low2..hi2]]|ky<-[low2..hi2-1]]
+                  +
+                  [*[<m_(r[5], kx, ky, m_(-1, r54), r65), m_(r[5], kx, ky+1, m_(-1, r54), r65)> |kx<-[low2..hi2]]|ky<-[low2..hi2-1]]
+                  //+
+                  //[*[<m_(r[4], kx, ky, r54, r64), m_(r[4], kx+1, ky+1, r54, r64)> |kx<-[low..hi-1]]|ky<-[low..hi-1]]
+                  ;
+               nxt = [m_(m_(1, 0, r[1], r[2]), r[5])
+                     ,m_(m_(0, 0, r[1], r[2]), r[5])
+                     ,m_(m_(0, -1, r[1], r[2]), r[5])
+                     ];
+               num R = sqrt((r[6][0]-nxt[0][0])*(r[6][0]-nxt[0][0])+(r[6][1]-nxt[0][1])*(r[6][1]-nxt[0][1]));
+               Figures rs = 
+                       [stepFigure(p, alpha, beta, r)[0]|tuple[num, num] p<-lattice]
+                        +[path("",100, 300, 300, [p_.M(r[6][0],r[6][1]), p_.dot(0.02)],fillColor="orange")]
+                        +[path("",100, 300, 300, [*[p_.M(d[0],d[1]), p_.dot(0.02)]|d<-nxt],fillColor="green")]
+                        +[path("",100, 300, 300, [p_.M(r[6][0],r[6][1]), p_.dot(R)])]
+                       ;
+               Figure lines = path("", 100, 300, 300, [p_.M(a[0][0], a[0][1])+p_.L(a[1][0], a[1][1])|a<-edges], lineColor="grey", size=<800, 800>, lineOpacity=0.5);
+                 
+             
+    /*
+    tuple[Figure, tuple[num, num], tuple[num, num],tuple[num, num]
+          ,tuple[num, num], tuple[num, num], tuple[num, num]
+         ] 
+         r1 =baseTriangle(r[1], 1, PI()/6, PI()/3);
+    tuple[Figure, tuple[num, num], tuple[num, num], tuple[num, num]
+          ,tuple[num, num], tuple[num, num], tuple[num, num]
+         ] r2 = baseTriangle(r[2], 1, PI()/6, PI()/3);
+    tuple[Figure, tuple[num, num], tuple[num, num],tuple[num, num] 
+          ,tuple[num, num], tuple[num, num], tuple[num, num]
+         ] r3 = baseTriangle(r[3], 1, PI()/6, PI()/3);
+    */
+    return box(fig=overlay(figs=rs+[lines], size=<800, 800>), fillColor="whitesmoke");
+    }
+
+void tnap() = render(nap());  
+
+void fnap(loc l) = writeFile(l, toHtmlString(nap())); 
+
+void pnap(){
+   // render(examples()
+   renderSave(nap(), |file:///ufs/bertl/html/nap.png|, javaLoc=|file:///ufs/bertl/jdk1.8.0_77|
+    , screenWidth=1200, screenHeight = 1200
+    );
+    }
+
+
+
