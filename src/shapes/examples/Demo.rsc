@@ -448,6 +448,8 @@ void tsincos() = render(sinAndCos());
 
 void tfsm() = render(fsm());
 
+void ffsm(loc l) = writeFile(l, toHtmlString(fsm()));
+
 Figure klokBox(int r, int n) =  atXY(0, n/2, box(size=<10, n>,  rounded=<10, 10>, lineWidth = 1, lineColor="black", fillColor="yellow"));
 
 Figure klokFrame() {
@@ -711,9 +713,58 @@ Figure pck1() = pack(
     return grid(figArray=[fs]);
     }
  
- void tgcd(int x, int y) = render(gcd(x, y));
+void tgcd(int x, int y) = render(gcd(x, y));
  
+int sFace = 3;
+ 
+Figure eye()= ellipse(rx=60/sFace, ry = 30/sFace, lineColor="brown", align = centerMid, fillColor="teal", lineWidth = 6
+                      , fig = circle(shrink=1.0, fillColor = "whitesmoke", lineWidth = 4, lineColor = "red"));
+                      
+ 
+                      
+ //Figure eye()= box(size=<200, 200>, lineColor="brown", fillColor="yellow", lineWidth = 20
+ //                     , fig = box(shrink=1.0, fillColor = "whitesmoke", lineWidth = 40, lineColor = "red"));
+ 
+Figure face() = // box(grow=1.1, fig=
+                 overlay(figs=[
+                 ellipse(lineWidth=1, grow= 1.0, fig=vcat( figs=[box(size=<50/sFace, 50/sFace>, lineWidth=0), hcat(figs=[eye(), eye()], hgap = 10/sFace)
+                  ,polygon(size=<50/sFace, 150/sFace>, points=[<0, 0>, <1,0>, <0.5, 1>],scaleX=<<0,1>,<0, 50/sFace>>,scaleY=<<0,1>,<150/sFace, 0>>, fillColor="pink") 
+                                     , box(size=<10/sFace, 10/sFace>, lineWidth= 0)
+                                     ,overlay(size=<201/sFace, 27/sFace>, figs=
+                                     [ellipse(size=<198/sFace, 27/sFace>, fillColor="orange"), atXY(10/sFace, 10/sFace, box(size=<180/sFace, 4/sFace>, fillColor="brown", rounded=<2, 2>))])
+                                      ,box(size=<50/sFace, 50/sFace>
+                                  , lineWidth = 0)]
+                       ,fillColor= "none"), fillColor="antiquewhite")
+                       //, lineWidth=0)
+                ])
+                       ;
+    
+void tface() = render(face()); 
 
+Figure newCircle(str lc, Alignment align, Figure el) {
+      return circle(r=-1, lineColor= lc, lineWidth = 4, 
+           fillColor = "none", padding=<0,0,0,0>, align = align, 
+      fig = el, shrink=0.9);
+      }
+
+Figure idCircleShrink(num shrink) = circle(shrink= shrink, lineWidth = 4, lineColor = pickColor()); 
+
+Figure bundle(int n, Alignment align) { resetColor(); return
+      (idCircleShrink(0.9) |newCircle(e, align, 
+      it)| e<-[pickColor()|int i<-[0..n]])
+      ;}
+      
+Figure bundle() = overlay(figs=[
+               bundle(4, centerLeft), 
+               bundle(4, centerRight),
+               // bundle(4, centerMid),  
+               bundle(4, topMid), 
+               bundle(4, bottomMid)
+              ], size=<400, 400>)
+               ;
+      
+void tbundle() = render(bundle(), size=<300, 300>);  
+      
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 public list[list[Figure]] figures(bool tooltip) = 
 [
@@ -732,10 +783,10 @@ public list[list[Figure]] figures(bool tooltip) =
             ];
             
  public list[Figure] packList() = [
-     pack([demo1(), demo2(), demo3() , demo4(), demo5(), demo6(), demo7() ,demo8()])
+     pack([demo1(), demo2(), demo3() , demo4(), demo5(), demo6(), demo7() ,demo8(), bundle()])
      ,pack([demo9(), demo10(), demo15() , demo13(), demo18(), demo19(), gcd(1071, 462)])
     ,pack([demo14(), demo11(), demo16() , demo17(), tetris(), box(fig=shrink(false), size=<400, 400>),decision(), triangle()
-    , steden2(), steden3(),pck()])
+    , steden2(), steden3(),pck(), face()])
      ];
             
 Figure demoFig() = grid(vgap=4, figArray=figures(false));

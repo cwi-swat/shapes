@@ -1920,7 +1920,7 @@ IFigure _overlay(str id, Figure f, IFigure fig1...) {
          'd3.select(\"#<id>\")<style("stroke-width", 0)>
          '<attr("pointer-events", "none")> 
          ; 
-         adjustOverlayFromCells("+figCalls(fig1)+", \"<id>\", <getLineWidth(f)<0?0:-getLineWidth(f)>,   <-hPadding(f)>, <-vPadding(f)>);\n
+         adjustOverlayFromCells("+figCalls(fig1)+", \"<id>\", <getLineWidth(f)<0?0:getLineWidth(f)>,   <-hPadding(f)>, <-vPadding(f)>);\n
          "
         , f.width, f.height, getAtX(f), getAtY(f), f.hshrink, f.vshrink, f.align, f.cellAlign,  getLineWidth(f), getLineColor(f), f.sizeFromParent, true >;
        addState(f);

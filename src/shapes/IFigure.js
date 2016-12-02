@@ -786,13 +786,18 @@ function adjustGridTableFromCells(id1, clients) {
 function adjustOverlayFromCells(clients, id1, lw, hpad, vpad) {
 		width = 0;
 		height = 0;
+		lw0 = 0;
 		var isEmpty = false;
 		for (var i = 0; i < clients.length; i++) {
 			var d = d3.select("#" + clients[i].id);
 			var e = d3.select("#" + clients[i].id + "_svg");
+			if (d.attr("width")==null) d = e;
+			if (e.empty()) e = d3.select("#" + clients[i].id + "_graph_svg");
 			if (!e.empty()) {
 				w = parseInt(d.attr("width")) + parseInt(e.attr("x"));
+				// alert(clients[i].id+" "+e.attr("width"));
 				h = parseInt(d.attr("height")) + parseInt(e.attr("y"));
+				if (clients[i].lw>lw0) lw0 = clients[i].lw;
 				if (w > width)
 					width = w;
 				if (h > height)
@@ -805,8 +810,9 @@ function adjustOverlayFromCells(clients, id1, lw, hpad, vpad) {
 		if (!isEmpty) {
 			c = d3.select("#" + id1);
 			c.attr("width", width).attr("height", height);
+			// alert(lw0);
 			c = d3.select("#" + id1 + "_svg");
-			c.attr("width", width).attr("height", height);
+			c.attr("width", width+2*lw0+1).attr("height", height+2*lw0+1);
 		}
 	for (var i = 0; i < clients.length; i++) {
 		var e = d3.select("#" + clients[i].id + "_svg");

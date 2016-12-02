@@ -106,24 +106,7 @@ Figure simple() {
  
  public void psimple() = renderShow(simple(), 
     width = 400, height = 400, javaLoc=|file:///ufs/bertl/jdk1.8.0_77|);
- 
- Figure eye()= ellipse(rx=60, ry = 30, lineColor="brown", align = centerMid, fillColor="teal", lineWidth = 6
-                      , fig = circle(shrink=1.0, fillColor = "whitesmoke", lineWidth = 4, lineColor = "red"));
-                      
- 
-                      
- //Figure eye()= box(size=<200, 200>, lineColor="brown", fillColor="yellow", lineWidth = 20
- //                     , fig = box(shrink=1.0, fillColor = "whitesmoke", lineWidth = 40, lineColor = "red"));
- 
-Figure face() = ellipse(grow= 1.2, fig=vcat( figs=[box(size=<50, 50>, lineWidth=0), hcat(figs=[eye(), eye()], hgap = 10)
-                  ,polygon(size=<50, 150>, points=[<0, 0>, <1,0>, <0.5, 1>],scaleX=<<0,1>,<0, 50>>,scaleY=<<0,1>,<150, 0>>, fillColor="pink") 
-                                     , box(size=<10, 10>, lineWidth= 0)
-                                     ,overlay(figs=
-                                     [ellipse(size=<200, 25>, fillColor="orange"), atXY(10, 10, box(size=<180, 4>, fillColor="brown", rounded=<2, 2>))])
-                                  ,box(size=<50, 50>, lineWidth = 0)]
-                       ,fillColor= "none"), fillColor="antiquewhite");
-    
-void tface() = render(face());                     
+              
                       
  
 public Figure idCircleShrink(num shrink) = circle(shrink= shrink, lineWidth = 4, lineColor = pickColor());
@@ -158,22 +141,6 @@ public Figure newNgon(str lc, Alignment align, Figure el) {
       fig = el, shrink=0.9);
       }
       
-public Figure bundle(int n, Alignment align) { resetColor(); return
-      (idCircleShrink(0.9) |newCircle(e, align, 
-      it)| e<-[pickColor()|int i<-[0..n]])
-      ;}
-      
-public Figure bundle() = overlay(figs=[
-               bundle(4, centerLeft), 
-               bundle(4, centerRight),
-               // bundle(4, centerMid),  
-               bundle(4, topMid), 
-               bundle(4, bottomMid)
-              ])
-               ;
-      
-void tbundle() = render(bundle(), size=<600, 600>);  
-
 public void fbundle(loc l) = writeFile(l, toHtmlString(
    bundle(), resizable=true
  )); 
@@ -299,7 +266,7 @@ public void fquest(loc l) = writeFile(l, toHtmlString(
  
  Figure funLine() {
       int w = 400; 
-      int h = 1600;
+      int h = 800;
       int offset = 5;
       num hc = 0.5;
       list[int] prim = primes(30);
@@ -320,13 +287,13 @@ public void fquest(loc l) = writeFile(l, toHtmlString(
       
       Figure cell1(int d, int x , int y) {
       from[d] = <x, y>;
-      return  atXY(c(x, y), box(fig=text("<d>"), size=c(0.25, hc), fillColor="yellow"));
+      return  atXY(c(x, y), box(fig=text("<d>", fontSize=9), size=c(0.25, hc), fillColor="yellow"));
       }
       
       Figure cell2(int d, int x , int y) {
       // println(d);
       to[d] = <x, y>;
-      return  atXY(c(x, y), box(fig=text("<d>"), size=c(0.25, hc), fillColor="antiquewhite"));
+      return  atXY(c(x, y), box(fig=text("<d>", fontSize=9), size=c(0.25, hc), fillColor="antiquewhite"));
       }
       
       Figure connect(int f, int t) {
@@ -339,7 +306,7 @@ public void fquest(loc l) = writeFile(l, toHtmlString(
          // , scaleX=<<0, w>, <0, w>>, scaleY=<<0, h>, <0, h>>
          )
          // ,circle(r=4, fillColor="firebrick", cx = cx(from[f].x+0.25)+0.2*rv[0], cy = cy(from[f].y+hc/2)+0.2*rv[1]
-           ,atXY(cx(from[f].x+0.25)+toInt(0.2*rv[0])-2, cy(from[f].y+hc/2)+toInt(0.2*rv[1])-(rv[1]>0?2:6), circle(r=4, fillColor="firebrick"
+           ,atXY(cx(from[f].x+0.25)+toInt(0.2*rv[0])-1, cy(from[f].y+hc/2)+toInt(0.2*rv[1])-(rv[1]>0?1:3), circle(r=2, fillColor="firebrick"
            , tooltip=box(fig=text("<multiplicity(f, t)>"), fillColor="floralwhite", size=<50, 50>)
            )
           //, tooltip = 
@@ -356,7 +323,7 @@ public void fquest(loc l) = writeFile(l, toHtmlString(
            );
       }
       
- void tfunLine() = render(funLine(), size=<800, 800>);
+ void tfunLine() = render(funLine(), size=<400, 400>);
  
  void pfunLine() = renderShow(funLine(), javaLoc=|file:///ufs/bertl/jdk1.8.0_77|, size=<800, 800>);
  
