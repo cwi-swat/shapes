@@ -294,7 +294,7 @@ public data Figure(
    			Figure startMarker=emptyFigure(),
    			Figure midMarker=emptyFigure(),
    			Figure endMarker=emptyFigure()) 
-   	| path(str transform, num scale, num xp, num yp, list[str] d, 				// Arbitrary shape
+   	| path(str transform, num scale, num xp, num yp, list[str] dd, 				// Arbitrary shape
     	// Connect vertices with line/curve
    			bool fillEvenOdd = true,		
    			Figure startMarker=emptyFigure(),
@@ -323,9 +323,8 @@ public data Figure(
 // Input elements
    | buttonInput(str txt, bool disabled=false,  value \value = "")
    | checkboxInput(list[str] choices = ["0"], value \value = (), value labels=())
-   | choiceInput(list[str] choices = ["0"], value \value = choices[0])
+   | choiceInput(list[str] choices = ["0"], value \value = "")
    // | colorInput()
-   
    // date
    // datetime
    // email
@@ -927,9 +926,10 @@ public DDD fileMap(loc source, str suffix) {
  public int(num) latticeY(int height, int ny) {
      return int(num y){return toInt((y*height)/ny);};
      }
-     
- public Figures intercalate(Figure sep, Figures l) = 
-	(isEmpty(l)) ? [] : ( head(l) | it + [sep]+[x]| x <- tail(l) );
+	
+public Figures intercalate(Figure sep, Figures l) =
+     (isEmpty(l)) ? [] : ( [head(l)] | it + [sep, x] | Figure x <-tail(l) );
+
      
    
 alias Clip = tuple[str(int x, int y, int w, int h) rect, str(int cx, int cy, int r) circle, str(list[str]) path] ;

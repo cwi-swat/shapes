@@ -381,9 +381,9 @@ function nPoints(el) {
 function fromInnerToOuterFigure(f, id1, toLw, hpad, vpad) {
 	var to = d3.select("#" + f.id);
 	var from = d3.select("#" + id1);
-	if (from.node().nodeName == "g") {
-		from = d3.select("#" + id1 + "_svg");
-	}
+	//if (from.node().nodeName == "g") {
+//	from = d3.select("#" + id1 + "_svg");
+//	}
 	var blow = 1.0;
 	if (from.node().nodeName == "rect" || from.node().nodeName == "TABLE") {
 		blow = Math.sqrt(2.0);
@@ -401,6 +401,7 @@ function fromInnerToOuterFigure(f, id1, toLw, hpad, vpad) {
 	 else {
 	 	width = document.getElementById(id1).getBoundingClientRect().width;
 	   }
+	// alert("fromInnerToOuter:"+id1+" "+width+" "+ from.node().nodeName+" "+fromLw);
 	var height = 0;
 	if (!invalid(from.attr("height")))
 		height = parseInt(from.attr("height"));
@@ -723,7 +724,7 @@ function adjustTableFromCells(id1, clients) {
 	if (invalid(width) && aUndefW.length == 0) {
 		width = document.getElementById(id1).getBoundingClientRect().width;
 		d3.select("#" + id1).attr("w", "" + width + "px");
-		//d3.select("#" + id1).style("width", "" + width + "px");
+		// d3.select("#" + id1).style("width", "" + width + "px");
 	}
 	var aUndefH = clients.filter(undefH);
 	var height = d3.select("#" + id1).attr("h");
@@ -733,7 +734,6 @@ function adjustTableFromCells(id1, clients) {
 		d3.select("#" + id1).attr("h", "" + height + "px");
 		//d3.select("#" + id1).style("height", "" + height + "px");
 	}
-	// alert("adjustTable:"+width);
 	if (invalid(width) || invalid(height))
 		return;
 	width = parseInt(width);
@@ -784,20 +784,18 @@ function adjustGridTableFromCells(id1, clients) {
 }
 
 function adjustOverlayFromCells(clients, id1, lw, hpad, vpad) {
-		width = 0;
-		height = 0;
-		lw0 = 0;
+		var width = 0;
+		var height = 0;
+		// var lw0 = 0;
 		var isEmpty = false;
 		for (var i = 0; i < clients.length; i++) {
-			var d = d3.select("#" + clients[i].id);
+			// var d = d3.select("#" + clients[i].id);
 			var e = d3.select("#" + clients[i].id + "_svg");
-			if (d.attr("width")==null) d = e;
-			if (e.empty()) e = d3.select("#" + clients[i].id + "_graph_svg");
 			if (!e.empty()) {
-				w = parseInt(d.attr("width")) + parseInt(e.attr("x"));
+				w = parseInt(e.attr("width")) + parseInt(e.attr("x"));
 				// alert(clients[i].id+" "+e.attr("width"));
-				h = parseInt(d.attr("height")) + parseInt(e.attr("y"));
-				if (clients[i].lw>lw0) lw0 = clients[i].lw;
+				h = parseInt(e.attr("height")) + parseInt(e.attr("y"));
+				// if (clients[i].lw>lw0) lw0 = clients[i].lw;
 				if (w > width)
 					width = w;
 				if (h > height)
@@ -810,9 +808,10 @@ function adjustOverlayFromCells(clients, id1, lw, hpad, vpad) {
 		if (!isEmpty) {
 			c = d3.select("#" + id1);
 			c.attr("width", width).attr("height", height);
-			// alert(lw0);
+			// alert("AdjustOverlayFromCells:"+c.attr("width")+" "+lw0);
 			c = d3.select("#" + id1 + "_svg");
-			c.attr("width", width+2*lw0+1).attr("height", height+2*lw0+1);
+			c.attr("width", width).attr("height", height);
+			
 		}
 	for (var i = 0; i < clients.length; i++) {
 		var e = d3.select("#" + clients[i].id + "_svg");

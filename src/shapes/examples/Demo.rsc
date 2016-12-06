@@ -661,9 +661,9 @@ Figure pck1() = pack(
       resetColor();
       return pack(
       [
-         *[box(size=<i*5*(j%2+1), ((j+1)%2+1)*i*5>, fillColor=pickColor())|j<-[1..20]] |i<-[3..6]
+         *[box(size=<i*5*(j%2+1), ((j+1)%2+1)*i*5>, lineWidth=1, lineColor="black", fillColor=pickColor())|j<-[1..20]] |i<-[3..6]
       ]+[box(fig=pck1(), fillColor="antiqueWhite", lineWidth=0)] 
-     size=<200, 200>);
+     size=<200, 200>, lineColor="black", lineWidth=1);
     }
     
  
@@ -725,9 +725,10 @@ Figure eye()= ellipse(rx=60/sFace, ry = 30/sFace, lineColor="brown", align = cen
  //Figure eye()= box(size=<200, 200>, lineColor="brown", fillColor="yellow", lineWidth = 20
  //                     , fig = box(shrink=1.0, fillColor = "whitesmoke", lineWidth = 40, lineColor = "red"));
  
-Figure face() = // box(grow=1.1, fig=
-                 overlay(figs=[
-                 ellipse(lineWidth=1, grow= 1.0, fig=vcat( figs=[box(size=<50/sFace, 50/sFace>, lineWidth=0), hcat(figs=[eye(), eye()], hgap = 10/sFace)
+Figure face() = //box(grow=1.0, fig=
+                 // overlay(figs=[
+                 ellipse(lineWidth=4, grow= 1.0, fig=vcat(lineWidth=1, 
+                  figs=[box(size=<50/sFace, 50/sFace>, lineWidth=0), hcat(figs=[eye(), eye()], hgap = 10/sFace)
                   ,polygon(size=<50/sFace, 150/sFace>, points=[<0, 0>, <1,0>, <0.5, 1>],scaleX=<<0,1>,<0, 50/sFace>>,scaleY=<<0,1>,<150/sFace, 0>>, fillColor="pink") 
                                      , box(size=<10/sFace, 10/sFace>, lineWidth= 0)
                                      ,overlay(size=<201/sFace, 27/sFace>, figs=
@@ -735,8 +736,8 @@ Figure face() = // box(grow=1.1, fig=
                                       ,box(size=<50/sFace, 50/sFace>
                                   , lineWidth = 0)]
                        ,fillColor= "none"), fillColor="antiquewhite")
-                       //, lineWidth=0)
-                ])
+                // ])
+                //)
                        ;
     
 void tface() = render(face()); 

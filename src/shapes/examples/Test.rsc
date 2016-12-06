@@ -806,5 +806,42 @@ void pnap(){
     );
     }
 
+Figure ovt() = box(fig=overlay(figs=[box(size=<100, 50>)], align=topLeft));
+
+void tovt() = render(ovt());  
+
+void fovt(loc l) = writeFile(l, toHtmlString(ovt())); 
+
+
+int sFace = 3;
+ 
+Figure eye()= ellipse(rx=60/sFace, ry = 30/sFace, lineColor="brown", align = centerMid, fillColor="teal", lineWidth = 6
+                      , fig = circle(shrink=1.0, fillColor = "whitesmoke", lineWidth = 4, lineColor = "red"));
+                      
+ 
+                      
+ //Figure eye()= box(size=<200, 200>, lineColor="brown", fillColor="yellow", lineWidth = 20
+ //                     , fig = box(shrink=1.0, fillColor = "whitesmoke", lineWidth = 40, lineColor = "red"));
+ 
+Figure face() = pack([box(grow=1.0, fig=
+                 //overlay(figs=[
+                 ellipse(grow= 1.0, fig=vcat( lineWidth = 1, figs=[
+                  box(size=<50/sFace, 50/sFace>, lineWidth=0)
+                  , hcat(figs=[eye(), eye()], hgap = 10/sFace)
+                  ,polygon(size=<50/sFace, 150/sFace>, points=[<0, 0>, <1,0>, <0.5, 1>],scaleX=<<0,1>,<0, 50/sFace>>,scaleY=<<0,1>,<150/sFace, 0>>, fillColor="pink") 
+                  ,box(size=<10/sFace, 10/sFace>, lineWidth= 0)
+                  ,overlay(size=<201/sFace, 27/sFace>, figs=
+                                     [ellipse(size=<198/sFace, 27/sFace>, fillColor="orange"), atXY(10/sFace, 10/sFace, box(size=<180/sFace, 4/sFace>, fillColor="brown", rounded=<2, 2>))])
+                                      ,box(size=<50/sFace, 50/sFace>
+                                  , lineWidth = 0)]
+                       ,fillColor= "none"), fillColor="antiquewhite"
+                       , lineWidth=4)
+                //])
+                )])
+                       ;
+    
+void tface() = render(face(), size=<800, 800>); 
+
+void fface(loc l) = writeFile(l, toHtmlString(face())); 
 
 

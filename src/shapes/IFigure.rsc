@@ -20,6 +20,8 @@ import util::Reflective;
  
 private loc base = getModuleLocation("shapes::Figure").parent;
 
+public loc getBase()= base;
+
 // The random accessable data element by key id belonging to a widget, like _box, _circle, _hcat. 
 
 alias Elm = tuple[value f, int seq, str id, str begintag, str endtag, str script, int width, int height,
@@ -246,7 +248,6 @@ public void clearWidget() {
 str visitFig(IFigure fig) {
        if (ifigure(str id, list[IFigure] f):= fig) {
           return "<widget[id].begintag> <for(d<-f){><visitFig(d)><}><widget[id].endtag>\n";
-       if (ifigure(str content):=fig) return content;
        }
     return "";
     }
@@ -1742,7 +1743,7 @@ IFigure _pack(str id, Figure f, IFigure fig1...) {
        widget[id] = <getCallback(f.event), seq, id, begintag, endtag, 
         "
         ' var blocks = [
-        ' <for (IFigure d<-fig1) {> {id:\"<getId(d)>\",w: getWidth(\"#<getId(d)>\"),h: getHeight(\"#<getId(d)>\"),x: 0, y: 0},<}>];
+        ' <for (IFigure d<-fig1) {> {id:\"<getId(d)>\",w: getWidth(\"#<getId(d)>_svg\"),h: getHeight(\"#<getId(d)>_svg\"),x: 0, y: 0},<}>];
         ' runPacker(\"<id>\", blocks, <width>, <height>);
         'd3.select(\"#<id>\")
         '// <on(getEvent(f.event), "doFunction(\"<id>\")")>
@@ -2974,9 +2975,9 @@ public void _render(Figure f..., int width = -1, int height = -1,
         fig1= buildFigMap(fig1);
         parentMap[fig1.id] = h.id; 
         buildParentTree(fig1);
-        IFigure f = _translate(fig1);
+        IFigure z = _translate(fig1);
         addState(fig1);
-        _render("<h.id><i>", f , width = width, height = height, align = align, fillColor = fillColor, lineColor = lineColor,
+        _render("<h.id><i>", z , width = width, height = height, align = align, fillColor = fillColor, lineColor = lineColor,
         borderWidth = borderWidth, borderStyle = borderStyle, borderColor = borderColor, display = display, event = event
         , resizable = resizable,
         defined = defined, cssFile = cssFile);
@@ -2984,8 +2985,7 @@ public void _render(Figure f..., int width = -1, int height = -1,
         }
      }
      
-  
- //public void main() {
+  //public void main() {
  //   clearWidget();
  //   IFigure fig0 = _rect("asbak",  emptyFigure(), fillColor = "antiquewhite", width = 50, height = 50, align = centerMid);
  //   _render(fig0);

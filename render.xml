@@ -1,7 +1,7 @@
 <project name="MyProject" default="create_run_jar" basedir=".">
 <property name="src" location="."/>
 <property name="build" location="bin"/>
-<property name="dist" location="lib"/>
+<property name="dist" location="/tmp"/>
 <target name="create_run_jar">
     <!--javac executable="${javaloc}" srcdir="${src}" destdir="${build}" fork="yes" includes="application/Fx.java"/>-->
     <javac srcdir="${src}" destdir="${build}" includes="application/Fx.java"/>
