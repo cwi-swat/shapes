@@ -462,7 +462,7 @@ public void ftree(loc l) = writeFile(l, toHtmlString(smallTree()));
        
        
 Figure tip() {
-        Figure r() = 
+        Figure ttip() = 
           frame(
           atXY(250, 250, 
             vcat(figs=[
@@ -472,7 +472,7 @@ Figure tip() {
        )
         ;
        Figure b = box(id="outer", bigger=2, fig=atXY(50, 50, box(id=  "inner", size=<200, 200>, fillColor = "none"
-           ,tooltip  = // r()
+           ,tooltip  = // ttip()
               // steden(width=400, height = 400)
               // vcat(figs=[d3()])
               d3()

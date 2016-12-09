@@ -1272,7 +1272,7 @@ str addShape(Figure s) {
     '     if (invalid(height)) height = d3.select(\"#\"+id+\"_svg\").attr(\"height\");
     '     width = parseInt(width);
     '     height= parseInt(height)+1;
-    '     d3.select(\"#\"+id+\"_svg\")<attr1("x", "Math.floor(n.x-width/2+offset)")><attr1("y", "Math.floor(n.y-height/2)")>;
+    '     d3.select(\"#\"+id+\"_svg\")<attr1("x", "Math.floor(n.x-width/2+offset)")><attr1("y", "Math.floor(n.y-height/2)+1")>;
     '     });
     ' console.log(g.graph().width);
     '}   
@@ -2200,7 +2200,7 @@ IFigure _hcat(str id, Figure f, bool addSvgTag, IFigure fig1...) {
         '<on(f)>
         '<stylePx("width", width)><stylePx("height", height)>
         '<attrPx("w", width)><attrPx("h", height)>      
-        '<debugStyle()> 
+        ' <if(debug){><debugStyle()><} else {> <borderStyleF(f)> <}>   
         '<style("background-color", "<getFillColor(f)>")> 
         '<style("border-spacing", "<f.hgap> <f.vgap>")> 
         '<style("stroke-width",getLineWidth(f))>
@@ -2285,7 +2285,7 @@ IFigure _vcat(str id, Figure f,  bool addSvgTag, IFigure fig1...) {
         '<attr("fill",getFillColor(f))><attr("stroke",getLineColor(f))>
         '<style("border-spacing", "<f.hgap> <f.vgap>")>
         '<style("stroke-width",getLineWidth(f))>
-        '<debugStyle()> 
+        '<if(debug){><debugStyle()><} else {> <borderStyleF(f)> <}>  
         '<style("background-color", "<getFillColor(f)>")> 
         '<style("border-spacing", "<f.hgap> <f.vgap>")> 
         '<style("stroke-width",getLineWidth(f))>
@@ -2926,7 +2926,8 @@ DDD treeToDDD(Figure f) {
         case g:rotateDeg(_, _, _, fg):  isEmpty(fg);
         }
         return false;
-     }  
+     } 
+ 
      
 public void _render(Figure f..., int width = -1, int height = -1, 
      Alignment align = centerMid, tuple[int, int] size = <0, 0>,

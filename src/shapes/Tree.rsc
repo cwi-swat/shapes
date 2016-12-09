@@ -21,6 +21,7 @@ int MIN = 0;
 
 map[str, TreeNode] m = ();
 
+
 alias EDGE = tuple[int yPosition, list[int] offset]; 
 
 list[tuple[EDGE left, EDGE right]] z = [];

@@ -500,10 +500,10 @@ function _adjust(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y, width,
 		height) {
 	var to = d3.select("#" + toId);
 	toLw = corner(n, toLw);
-	width = width -  toLw - x;
-	height = height - toLw - y;
-	var w = Math.ceil(width * hshrink);
-	var h = Math.ceil(height * vshrink);
+	//width = width -  x;
+	//height = height - y;
+	var w = Math.ceil(width * hshrink)-toLw-x;
+	var h = Math.ceil(height * vshrink)-toLw-y;
 	var  invalidW = invalid(to.attr("width"))&&invalid(to.attr("w"));
 	var  invalidH = invalid(to.attr("height"))&&invalid(to.attr("h"));
 	// alert(""+to.attr("width")+" "+ to.style("width")+" "+to.attr("w")+" "+to.node().nodeName);

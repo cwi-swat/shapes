@@ -47,10 +47,14 @@ void bezoek(PROGRAM n) {
         }
     }
     
-Figure cell(str s, str fontWeight="normal", str fontColor = "black", str fontStyle = "normal", str id ="") = 
-         box(size=<80,40>, id = id, fig = text(s
+Figure cell(str s, str fontWeight="normal", str fontColor = "black", str fontStyle = "normal", str id ="") {
+         str id0 = (id?)?id:newId();
+         return
+         box(size=<80,40>, id = id0, fig = text(s
                   ,fontWeight = fontWeight, fontColor = fontColor, fontStyle = fontStyle
        ),fillColor = "antiquewhite", rounded=<10,10>, lineWidth = 0,
+         tooltip = (id2pos[id0]?)?"<substring(input, id2pos[id0][0],  id2pos[id0][0]+id2pos[id0][1])>":"",
+         // tooltip = id0 ,
          event=on("click", 
           void(str ev, str id, str v){
              if (id2pos[id]?) textProperty("panel", html=
@@ -60,8 +64,9 @@ Figure cell(str s, str fontWeight="normal", str fontColor = "black", str fontSty
             
             }
           ));
+          }
        
-Figure nonTerm(str s, str id = "") = cell(s, fontWeight="bold",  fontColor="darkblue", id = id);
+Figure nonTerm(str s, str id = "") = cell(s, fontWeight="bold",  fontColor="darkblue", id = (id?)?id:newId());
       
        
        
@@ -117,6 +122,7 @@ Figure compileStats(list[STATEMENT] Stats1) {     /*6*/
   }
   
 // Compile declarations
+
 
 Figure compileDecls(list[DECL] Decls) =
   tree(nonTerm("Decls"), [ ((d.tp == natural()) ? decl("NAT", d.name, d) : decl("STR", d.name, d))  |      
@@ -179,5 +185,6 @@ public void main() {
     Figure f = hcat(lineWidth = 1, align = topLeft, figs= [g, t], borderWidth =-1, borderStyle="groove", borderColor="");
     // writeFile(|file:///ufs/bertl/html/v.html|, toHtmlString(f));
     // println(id2pos);
-    render(f, lineWidth = 0);
+    // render(t, lineWidth = 0);
+    writeFile(|file:///ufs/bertl/html/u.html|, toHtmlString(t));
    }

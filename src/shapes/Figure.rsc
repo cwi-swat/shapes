@@ -228,7 +228,7 @@ public data Figure(
 		// In tables
 		int rowspan = -1,
 		int colspan = -1,
-		str borderStyle="", 
+		str borderStyle="",  // solid|dotted|double|groove|ridge|inset|outset
 		int borderWidth=-1, 
 		str borderColor = "",
 		str borderTopStyle="", 
@@ -305,8 +305,8 @@ public data Figure(
 
 // Figure composers
 // borderStyle =  none|hidden|dotted|dashed|solid|double|groove|ridge|inset|outset|initial|inherit;              
-   | hcat(Figures figs=[], str borderStyle="solid", int borderWidth=0, str borderColor = "", bool form= false) 					// horizontal and vertical concatenation
-   | vcat(Figures figs=[], str borderStyle="solid", int borderWidth=0, str borderColor = "", bool form= false) 					// horizontal and vertical concatenation 
+   | hcat(Figures figs=[], bool form= false) 					// horizontal and vertical concatenation
+   | vcat(Figures figs=[], bool form= false) 					// horizontal and vertical concatenation 
    | overlay(Figures figs=[])				
    | grid(list[Figures] figArray = [[]], bool form= false) 	// grid of figures
 
@@ -664,9 +664,10 @@ public Figure plot(Points xy, Rescale x, Rescale y, bool shapeCurved = true
       width = width, height = height, fillEvenOdd = fillEvenOdd);
       }
 
-public Figure frame(Figure f, num shrink=1.0, num grow=1.0, str id = "", str visibility="visible") {
+public Figure frame(Figure f, num shrink=1.0, num grow=1.0, str id = "", str visibility="visible", int borderWidth = -1, 
+      str borderStyle = "") {
       return box(lineWidth=0, fillColor="none", fig = f, shrink= shrink, grow = grow, id = false?"<newId()>_frame":id
-      , visibility = visibility);
+      , visibility = visibility, borderWidth=borderWidth, borderStyle= borderStyle);
       }
       
 public Figure circleSegment(num cx = 100, num cy =100, num r =50, num startAngle = 0, num endAngle =60,

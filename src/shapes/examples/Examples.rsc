@@ -4,7 +4,6 @@ import shapes::Figure;
 import shapes::FigureServer; 
 import IO;
 
-
 import String;
 import List;
 import ListRelation;
@@ -240,14 +239,17 @@ void tngon17(){ ex("ngon17", ngon17); }
 public Figure ngon18 = ngon(n = 10, fillColor="red", fig=box(size=<250,180>, fillColor="yellow"));
 void tngon18(){ ex("ngon18", ngon18); }
 
-Figure ngons() = grid(gap=<10,10>,
+Figure ngons() = grid( gap=<10,10>,
                     figArray=[ 
 							[ngon1, ngon2, ngon3, ngon4, ngon5, ngon6],
 							[ngon7, ngon8, ngon9, ngon10, ngon11, ngon12],
 							[ngon13, ngon14, ngon15, ngon16, ngon17, ngon18]			    
   						 ]);
-  						 
+
+
+						 
 void tngons() = render(buttonInput("ngons", panel = panel(ngons())));
+
 
 /********************** polygon ******************************/
 
@@ -584,33 +586,36 @@ Figure vcats() = grid(gap=<10,10>,
 void tvcats() = render(buttonInput("vcats", panel = panel(vcats())));
 /********************** grid ******************************/
 
-Figure RedBox = box(fillColor="red", size=<50,50>);
-Figure BlueBox = box(fillColor="blue", size=<100,30>);
-Figure GreenBox = box(fillColor="green", size=<40,60>);
+Figure RedBox = box(fillColor="red", size=<50,50>, borderStyle="groove");
+Figure BlueBox = box(fillColor="blue", size=<100,30>, borderStyle="groove");
+Figure GreenBox = box(fillColor="green", size=<40,60>, borderStyle="groove");
 
+Figure grid1 = grid(figArray=[[RedBox],[BlueBox]], gap=<10,10>, borderStyle="groove");
 
-void grid1(){
-	ex("grid1", grid(figArray=[ [RedBox],
-							    [BlueBox]
-							  ], gap=<10,10>));
-}
+void tgrid1(){ex("grid1", grid1);}
 
-void grid2(){
-	ex("grid2", grid(figArray=[ [RedBox, GreenBox],
+Figure grid2 = grid(figArray=[ [RedBox, GreenBox],
+							   [BlueBox, RedBox, RedBox]
+							  ], gap=<10,10>, borderStyle="groove");
+
+void tgrid2(){ex("grid2",  grid2);}
+
+Figure grid3 = grid(figArray=[ [box(fillColor="red", size=<50,50>, borderStyle="groove"), GreenBox],
+							                        [BlueBox, RedBox, RedBox]
+							  ]                     , gap=<10,10>, align=topLeft, borderStyle="groove");							  
+void tgrid3() {ex("grid3", grid3);}
+
+Figure grid4 = grid(figArray=[ [box(fillColor="red", size=<50,50>, borderStyle="groove"), GreenBox],
 							    [BlueBox, RedBox, RedBox]
-							  ], gap=<10,10>));
-}
+							  ], gap=<10,10>, align=bottomRight, borderStyle="groove");
+							  
+void tgrid4(){ex("grid4", grid4);}
 
-void grid3(){
-	ex("grid3", grid(figArray=[ [box(fillColor="red", size=<50,50>), GreenBox],
-							    [BlueBox, RedBox, RedBox]
-							  ], gap=<10,10>, align=topLeft));
-}
-void grid4(){
-	ex("grid4", grid(figArray=[ [box(fillColor="red", size=<50,50>), GreenBox],
-							    [BlueBox, RedBox, RedBox]
-							  ], gap=<10,10>, align=bottomRight));
-}
+Figure grids() =
+	grid(gap=<10,10>,figArray=[ [grid1, grid2, grid3, grid4]]);
+
+void tgrids() = render(buttonInput("grids", panel = panel(grids())));
+
 
 // grid flex
 
@@ -672,20 +677,24 @@ void toverlays() = render(buttonInput("overlays", panel = panel(overlays())));
 
 /********************** atXY ********************************/
 
-public Figure at1 = atXY(100, 100, box(fillColor="red", size=<50,50>));
+public Figure at1 =  frame(
+                         atXY(100, 100, box(fillColor="red", size=<50,50>))
+                         , borderStyle="groove"
+    )
+    ;
 void tat1(){ render(at1); }
 
-public Figure at2 = overlay(align=topLeft,
+public Figure at2 = frame(overlay(align=topLeft, 
 						figs= [atXY(100,100, box(fillColor="red", size=<50,50>)),
 							   atXY(200,200, box(fillColor="green", size=<50,50>))
-							  ]);
+							  ]), borderStyle="groove");
 void tat2(){ ex("at2", at2); }
 
-public Figure at3 = box(fig=overlay(align=topLeft,
+public Figure at3 = frame(overlay(align=topLeft,
 	                          figs= [atXY(100,100, box(fillColor="red", size=<50,50>)),
 								     atXY(200,200, box(fillColor="green", size=<50,50>)),
 								     atXY(0,0, box(fillColor="blue", size=<50,50>))
-								]));
+								]), borderStyle="groove");
 void tat3(){ ex("at3", at3); }
 
 public Figure at4 = hcat(figs= [
@@ -1058,7 +1067,6 @@ void ttooltips(){ ex("text11", tooltips()); }
 
 // ------------- ALL TESTS -------------------------
 
-
 Figure panel(Figure f) = atXY(100, 100, f);
 
 Figure panel(str id, Figure f) = box(id=id, fig = f, visibility="hidden");
@@ -1076,6 +1084,7 @@ Figure examples() {
      ,<"texts", texts()>
      ,<"hcats", hcats()>
      ,<"vcats", vcats()>
+     ,<"grids", grids()>
     , <"tooltips", tooltips()>
     ,<"ats", ats()>
     ,<"rotates", rotates()>

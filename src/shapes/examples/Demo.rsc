@@ -19,8 +19,6 @@ import shapes::Render;
 import util::Math;
 import Prelude;
 
-// import vis::Render;
-
 
 void ex(str title, Figure b, bool debug = false) = render(b, debug = debug, align = centerMid);
 
@@ -419,7 +417,7 @@ list[tuple[str, Figure]] flagNodes = [<"nl", dutch()>, <"be", belgium()>
                   edge("be", "fr"), edge("be", "de"), edge("fr", "it")];
                   
                  
-Figure gflags() = graph(nodes=flagNodes, edges=flagEdges, size=<300, 600>, pageBreak=true);
+Figure gflags() = graph(nodes=flagNodes, edges=flagEdges, size=<300, 600>);
 
 void tgflags() = render(box(fig=gflags(), size=<400, 400>, align =  centerMid));
 

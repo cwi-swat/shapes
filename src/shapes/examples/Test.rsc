@@ -817,9 +817,7 @@ int sFace = 3;
  
 Figure eye()= ellipse(rx=60/sFace, ry = 30/sFace, lineColor="brown", align = centerMid, fillColor="teal", lineWidth = 6
                       , fig = circle(shrink=1.0, fillColor = "whitesmoke", lineWidth = 4, lineColor = "red"));
-                      
- 
-                      
+                                    
  //Figure eye()= box(size=<200, 200>, lineColor="brown", fillColor="yellow", lineWidth = 20
  //                     , fig = box(shrink=1.0, fillColor = "whitesmoke", lineWidth = 40, lineColor = "red"));
  

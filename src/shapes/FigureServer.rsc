@@ -34,7 +34,6 @@ public void renderWeb(
          }
      }
      
-
       
 public str toHtmlString(Figure fig1..., int width = -1, int height = -1, 
      Alignment align = <0.5, 0.5>, tuple[int, int] size = <0, 0>,
