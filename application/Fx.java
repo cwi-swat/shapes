@@ -5,8 +5,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.imageio.ImageIO;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
@@ -18,7 +27,13 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import javafx.scene.Group;
 import javafx.util.Duration;
+import javafx.scene.layout.VBox;
+import javafx.scene.control.Button;
+import javafx.stage.FileChooser;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 public class Fx extends Application {
 	static int width;
@@ -26,19 +41,70 @@ public class Fx extends Application {
 	static String fname;
 	static String oname;
 	static boolean snapshot;
+	
+ArrayList<Node> removeButtons(WebEngine webEngine) {
+		Document document = webEngine.getDocument();
+        Element elementById = document.getElementById("body");
+    	NodeList childNodes = elementById.getChildNodes();
+    	ArrayList<Node> arrayList = new ArrayList<Node>();
+    	   for (int i=2;i<childNodes.getLength();i++) { 
+    		   Node node = childNodes.item(i);
+    		   if (node.hasAttributes()) {
+    		     NamedNodeMap attributes = node .getAttributes();
+    		     if (
+                 attributes.getNamedItem("class")!=null && attributes.getNamedItem("class").getNodeValue().equals("button")) {
+    	  	     arrayList.add(
+    		         elementById.removeChild(childNodes.item(i))
+    	  			 )
+	               ;
+    		     }
+    	        }	
+    	   }
+    return arrayList;
+	}
 
 	@Override
 	public void start(Stage primaryStage) {
 		primaryStage.setMinWidth(width);
 		primaryStage.setMinHeight(height);
-		// System.err.println("start:" + fname + ":" + width);
-		WebView wb = new WebView();
-		WebEngine webEngine = wb.getEngine();
-		Scene scene = new Scene(wb, width, height);
+		System.out.println("start:" + fname + ":" + width);
+		// Group root = new Group();
+		VBox box = new VBox();
+		final WebView wb = new WebView();
+		final WebEngine webEngine = wb.getEngine();
+		box.getChildren().add(wb);
+		final Scene scene = new Scene(box, width, height);
+		final Button buttonSave = new Button("Save");
+		if (!snapshot) box.getChildren().add(buttonSave);
+		buttonSave.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+           public void handle(ActionEvent arg0) {
+               box.getChildren().remove(buttonSave);
+               ArrayList<Node> arrayList = removeButtons(webEngine);
+               FileChooser fileChooser = new FileChooser();
+               fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+               fileChooser.setInitialFileName("shapes.png");
+               File file = fileChooser.showSaveDialog(primaryStage);
+               WritableImage img = new WritableImage(width, height);
+			   scene.snapshot(img);
+			   try {
+                  ImageIO.write(SwingFXUtils.fromFXImage(img, null), "png", file);
+			   } catch (Exception s) {
+				}
+			   box.getChildren().add(buttonSave);
+			   Document document = webEngine.getDocument();
+		       Element elementById = document.getElementById("body");
+			   for (int i = 0; i < arrayList.size(); i++) {
+			      Node n = arrayList.get(i);
+				  elementById.appendChild(n);
+			      }
+           }
+       });
+		
 		webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
 			if (newState == State.SUCCEEDED) {
-				// System.out.println("SUCCESS");
 				if (snapshot) {
+					removeButtons(webEngine);
 					final PauseTransition pause = new PauseTransition(Duration.millis(500));
 					pause.setOnFinished(e -> {
 						WritableImage img = new WritableImage(width, height);
@@ -57,7 +123,7 @@ public class Fx extends Application {
 		});
         webEngine.load(fname);
 		primaryStage.setScene(scene);
-		System.err.println("end");
+		System.out.println("end");
 		primaryStage.show();
 
 	}

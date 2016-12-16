@@ -4,37 +4,69 @@ import shapes::IFigure;
 import util::ShellExec;
 import util::Reflective;
 import Prelude;
-// import util::Resources;  
-
+// import util::Resources; 
 public void renderWeb(
-      Figure fig1..., int width = -1, int height = -1, int lineWidth = -1,
+     Figure() fig1..., int width = -1, int height = -1, int lineWidth = -1,
      Alignment align = <0.5, 0.5>, tuple[int, int] size = <0, 0>,
      Event event = on(nullCallback),
      str fillColor = "white", str lineColor = "black", bool debug = false
      , int borderWidth = -1,  str borderColor = "", str borderStyle = "", bool resizable = true,
      str cssFile="", bool eclipse=true, loc javaLoc=|file:///usr|
-      ,int screenWidth = 500, int screenHeight = 500, loc pngFile=|tmp:///vision.png|, bool snapshot=false, bool defined = true)
+      ,int screenWidth = 500, int screenHeight = 500, loc pngFile=|tmp:///vision.png|, bool snapshot=false, bool defined = true
+      , void() beforeLoad = void(){return;})
      {      
      setDebug(debug);
-          _render(fig1, width = width,  height = height,  align = align, fillColor = fillColor,
-     lineColor = lineColor, size = size, display = true
-     , borderWidth = borderWidth, borderStyle = borderStyle, resizable = resizable,
-     cssFile = cssFile, defined = defined, lineWidth = lineWidth, event = event
-     );  
-     if (!eclipse) {
+        setCurrentFigures(fig1);
+        _setBeforeLoad(beforeLoad);
+        Options options = getOptions();
+        options.width = width;  options.height = height;  options.align = align; options.fillColor = fillColor
+                 ;options.lineColor = lineColor; options.size = size; options.display = true
+                 ;options.borderWidth = borderWidth; options.borderStyle = borderStyle; options.resizable = resizable
+                 ;options.cssFile = cssFile; options.defined = defined; options.lineWidth = lineWidth; options.event = event;
         // loc home = location(|project://shapes|);
+        setOptions(options);
         loc home = resolveLocation(|tmp:///|);
         // loc home = |tmp:///|;
         // loc classpath=home+"lib/html2png.jar";
+        // println("renderWeb:<(getSite()+"fx").uri>");
         loc classpath=home+"html2png.jar";
          javaLoc=javaLoc+"bin"+"java";
           PID pid = createProcess(javaLoc.path
-         ,args=["-jar", classpath.path, getSite().uri, snapshot?pngFile.uri:"", "<screenWidth>", "<screenHeight>",snapshot?"true":"false"]
+         ,args=["-jar", classpath.path, (getSite()+"fx").uri, snapshot?pngFile.uri:"", "<screenWidth>", "<screenHeight>",snapshot?"true":"false"]
+         );
+     } 
+
+public void renderWeb(
+     Figure fig1..., int width = -1, int height = -1, int lineWidth = -1,
+     Alignment align = <0.5, 0.5>, tuple[int, int] size = <0, 0>,
+     Event event = on(nullCallback),
+     str fillColor = "white", str lineColor = "black", bool debug = false
+     , int borderWidth = -1,  str borderColor = "", str borderStyle = "", bool resizable = true,
+     str cssFile="", bool eclipse=true, loc javaLoc=|file:///usr|
+      ,int screenWidth = 500, int screenHeight = 500, loc pngFile=|tmp:///vision.png|, bool snapshot=false, bool defined = true
+      )
+     {  
+       _render(fig1, width = width,  height = height,  align = align, fillColor = fillColor
+                 ,lineColor = lineColor, size = size, display = true
+                 ,borderWidth = borderWidth, borderStyle = borderStyle, resizable = resizable
+                 ,cssFile = cssFile, defined = defined, lineWidth = lineWidth, event = event
+                 );     
+       setDebug(debug);
+       if (!eclipse) {
+          loc home = resolveLocation(|tmp:///|);
+        // loc home = |tmp:///|;
+        // loc classpath=home+"lib/html2png.jar";
+        // println("renderWeb:<(getSite()+"fx").uri>");
+          loc classpath=home+"html2png.jar";
+          javaLoc=javaLoc+"bin"+"java";
+             PID pid = createProcess(javaLoc.path
+            ,args=["-jar", classpath.path, (getSite()+"eclipse").uri, snapshot?pngFile.uri:"", "<screenWidth>", "<screenHeight>",snapshot?"true":"false"]
          );
          }
      }
      
-      
+public void setCurrentFigures(list[Figure()] fs) {_setCurrentFigures(fs);}
+           
 public str toHtmlString(Figure fig1..., int width = -1, int height = -1, 
      Alignment align = <0.5, 0.5>, tuple[int, int] size = <0, 0>,
      str fillColor = "white", str lineColor = "black", bool debug = false
@@ -68,6 +100,23 @@ public void renderSave(Figure fig1, loc pngFile
        ,borderWidth = borderWidth, borderStyle = borderStyle, borderColor = borderColor, resizable = resizable
        ,cssFile=cssFile, pngFile = pngFile, snapshot = true, screenWidth = screenWidth, screenHeight = screenHeight,
        javaLoc = javaLoc, eclipse = false, defined = (width? && height?)||(size?) || defined
+      );  
+      }
+      
+public void renderShow(Figure() fig1...
+     ,int width = -1, int height = -1
+     ,Alignment align = <0.5, 0.5>, tuple[int, int] size = <0, 0>
+     ,str fillColor = "white", str lineColor = "black", bool debug = false
+     ,int borderWidth = -1,  str borderColor = "", str borderStyle = "", bool resizable = true
+      ,int screenWidth = 500, int screenHeight = 500, str cssFile="", loc javaLoc=|file:///usr|, bool defined = false
+      ,void() beforeLoad = void(){return;}
+      ) 
+       {
+      renderWeb(fig1, width = width,  height = height,  align = align, fillColor = fillColor,
+       lineColor = lineColor, size = size
+       ,borderWidth = borderWidth, borderStyle = borderStyle, borderColor = borderColor, resizable = resizable
+       ,cssFile=cssFile, snapshot = false, screenWidth = screenWidth, screenHeight = screenHeight,
+       javaLoc = javaLoc, eclipse = false, defined =  (width? && height?)||(size?) || defined, beforeLoad = beforeLoad
       );  
       }
       

@@ -16,5 +16,5 @@ public void render(Figure fig1..., int width = -1, int height = -1,
      , resizable = resizable, defined = (width? && height?)||(size?) || defined, cssFile = cssFile, 
      debug = debug);
      // println(toString());
-     htmlDisplay(getSite());
+     htmlDisplay(getSite()+"eclipse");
      }

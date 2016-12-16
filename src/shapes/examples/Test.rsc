@@ -74,16 +74,17 @@ public void standard() {
  
 // Figure simple() =  hcat(figs=[box(size=<30, 30>, fillColor="blue"), box(size=<50, 50>, fillColor="yellow"), box(size=<70, 70>, fillColor=  "red")],align= topLeft);
 
+public Figure innerCircle = circle(shrink=0.6, lineWidth=8, fillColor = "antiquewhite", align = centerRight, lineColor="green");
+
 Figure simple() {
-  Figure f = circle(shrink=0.6, lineWidth=8, fillColor = "antiquewhite", align = centerRight, lineColor="green");
-  return hcat(figs=[box(
+  
+  return hcat(size=<500, 500>, figs=[box(
    , fig=circle(shrink=0.8, fillColor ="antiquewhite", lineWidth = 20, lineColor="blue", align = centerRight
     , fig = ngon(n=5, shrink=0.8, lineWidth = 20,  lineColor = "red", fillColor="yellow", align = centerMid
-    ,fig = circle(shrink=0.6, lineWidth=8, fillColor = "antiquewhite", lineColor="green"
+    ,fig =  innerCircle
    // ,event=on("click", box(fig=atXY(100, 100, 
   //  box(vgrow=2.0, lineWidth = 4, lineColor="grey", fig=text("\<pre\><f>\</pre\>"), fillColor = "whitesmoke"))/*, fillColor="none"*/))
  //,tooltip = box(size=<15, 15>, fillColor="green")
-   )
 )
 )
 )]);}
@@ -101,14 +102,17 @@ Figure simple() {
  
  
  public void fsimple(loc l) = writeFile(l, toHtmlString(
-   simple(), size=<600, 600>, resizable=true
+   simple(), strInput(size=<100, 20>, print = false)
  )); 
  
- public void psimple() = renderShow(simple(), 
-    width = 400, height = 400, javaLoc=|file:///ufs/bertl/jdk1.8.0_77|);
-              
-                      
+ Figure input() {return  strInput(size=<100, 20>, print = false);}
  
+ list[Figure()] inputs = [simple, input];
+ 
+ public void psimple() = renderShow(simple , input
+    ,screenWidth = 700, screenHeight = 700, javaLoc=|file:///ufs/bertl/jdk1.8.0_77|,
+    beforeLoad=void(){println("beforeLoad"); setCurrentFigures(inputs);});
+                              
 public Figure idCircleShrink(num shrink) = circle(shrink= shrink, lineWidth = 4, lineColor = pickColor());
 
 public Figure idEllipseShrink(num shrink) = ellipse(shrink= shrink, lineWidth = 4, lineColor = pickColor());

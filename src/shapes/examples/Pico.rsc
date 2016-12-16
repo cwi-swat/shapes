@@ -185,6 +185,6 @@ public void main() {
     Figure f = hcat(lineWidth = 1, align = topLeft, figs= [g, t], borderWidth =-1, borderStyle="groove", borderColor="");
     // writeFile(|file:///ufs/bertl/html/v.html|, toHtmlString(f));
     // println(id2pos);
-    // render(t, lineWidth = 0);
-    writeFile(|file:///ufs/bertl/html/u.html|, toHtmlString(t));
+    render(t, lineWidth = 0);
+    // writeFile(|file:///ufs/bertl/html/u.html|, toHtmlString(t));
    }

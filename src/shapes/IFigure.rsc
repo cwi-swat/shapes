@@ -22,6 +22,21 @@ private loc base = getModuleLocation("shapes::Figure").parent;
 
 public loc getBase()= base;
 
+alias Options = tuple[
+       int width, int height
+     , Alignment align, tuple[int, int] size
+     , str fillColor, str lineColor 
+     , int lineWidth, bool display, real lineOpacity, real fillOpacity
+     , Event event, int borderWidth, str borderStyle, str borderColor
+     , bool resizable, bool defined, str cssFile]
+     ;
+     
+Options options = <-1, -1 ,topLeft, <-1, -1> ,"", "" ,-1, false, 1.0, 1.0 ,noEvent(), -1, "", "" ,false, false, "">;
+     
+public Options getOptions() = options;
+
+public void setOptions(Options opt) {options = opt;}
+
 // The random accessable data element by key id belonging to a widget, like _box, _circle, _hcat. 
 
 alias Elm = tuple[value f, int seq, str id, str begintag, str endtag, str script, int width, int height,
@@ -47,7 +62,7 @@ public data IFigure = iemptyFigure(int seq);
 
 // --------------------------------------------------------------------------------
 
-bool debug = true;
+bool debug = false;
 str cssLocation = "";
 
 int seq = 0;
@@ -86,6 +101,10 @@ public map[str, tuple[str, str]] dialog = ();
 public map[str, list[IFigure] ] defs = ();
 
 list[IFigure] currentFigs = [];
+
+list[Figure()] currentFigures = [];
+
+void() beforeLoad = void(){return;};
 
 int upperBound = 99999;
 int lowerBound = 2;
@@ -224,6 +243,15 @@ void addState(Figure f) {
     state += <f.id, prop >;
     old+= prop;
     }
+    
+public void _setCurrentFigures(list[Figure()] figs) {
+    currentFigures = figs;
+    }
+    
+public void _setBeforeLoad(void() f) {
+   println("_setBeforeLoad:<f>");
+   beforeLoad = f;
+   }
       
 public void clearWidget() { 
     // println("clearWidget");
@@ -256,7 +284,8 @@ str visitFig(IFigure fig) {
 str visitFig(list[IFigure] figs) {
     str r = "";
     for (IFigure fig<-figs) {
-       r+="\<div class=\"page\"\>";
+       bool print = (figMap[fig.id]?)?figMap[fig.id].print:true;
+       r+="\<div class=\"<print?"page":"button">\"\>";
        r+=visitFig(fig);
        r+="\</div\>";
        }
@@ -397,7 +426,7 @@ str getIntro() {
        ' onload=initFunction;
        '\</script\>
        '\</head\>
-       '\<body\>
+       '\<body id=\"body\"\>
        '<visitFig(currentFigs)>
        '<visitTooltipFigs()>    
        '\</body\>     
@@ -405,9 +434,21 @@ str getIntro() {
     // println(res);
 	return replaceAll(res,"\n\n", "");
 	}
+	
+Response page(get(/^\/eclipse$/)) { 
+	return response(getIntro());
+}
 
-
-Response page(get(/^\/$/)) { 
+Response page(get(/^\/fx$/)) { 
+    println("reload:<size(currentFigures)>");
+    beforeLoad();
+    Figures fig = [f()|f<-currentFigures];
+    _render(fig, width = options.width,  height = options.height,  align = options.align
+           ,fillColor = options.fillColor
+           ,lineColor = options.lineColor, size = options.size, display = options.display
+           ,borderWidth = options.borderWidth, borderStyle = options.borderStyle, resizable = options.resizable
+           ,cssFile = options.cssFile, defined = options.defined, lineWidth = options.lineWidth, event = options.event
+           );  
 	return response(getIntro());
 }
 
@@ -531,7 +572,6 @@ Response page(req:post(/^\/getValue\/<ev:[a-zA-Z0-9_]+>\/<name:[a-zA-Z0-9_]+>\/<
 	// println(parameters);
 	//  str lab = name;
 	for (str id<-req.parameters) {
-	     // println(id);
 	     callCallback(ev, id, req.parameters[id]);
 	     }
 	callCallback(ev, name, v);
@@ -558,7 +598,7 @@ Response page(req:post(/^\/getValue\/<ev:[a-zA-Z0-9_]+>\/<name:[a-zA-Z0-9_]+>\/<
 }
 
 default Response page(get(str path)) {
-   println("File response: <base+path>");
+   // println("File response: <base+path>");
    return response(base + path); 
    }
 
@@ -2628,7 +2668,7 @@ Figure addSuffix(str id, Figure g, str suffix) {
     return g;   
     }
 
-Figure pL(Figure f) {
+Figure idToFigure(Figure f) {
          if (emptyFigure():=f) {
              f.id="emptyFigure"; 
              f.seq= occur; 
@@ -2652,7 +2692,7 @@ Figure pL(Figure f) {
 
 Figure buildFigMap(Figure f) {  
     return  visit(f) {
-       case Figure g => pL(g)
+       case Figure g => idToFigure(g)
     }  
    }
    
@@ -2956,7 +2996,7 @@ public void _render(Figure f..., int width = -1, int height = -1,
         figMap[h.id] = h;
         fig=[];
         int i = 0;
-        for (Figure fig1<-f) {
+      for (Figure fig1<-f) {
         if (atXY(_, _, _):= fig1 || atX(_,_):=fig1 || atY(_,_):=fig1){
              align = topLeft; 
              fig1=overlay(figs=[fig1]);
@@ -2973,17 +3013,20 @@ public void _render(Figure f..., int width = -1, int height = -1,
             fig1.hgrow = fig1.grow;
             fig1.vgrow = fig1.grow;
             }
+        str qid = "<h.id><i>";
         fig1= buildFigMap(fig1);
         parentMap[fig1.id] = h.id; 
         buildParentTree(fig1);
         IFigure z = _translate(fig1);
+        figMap[qid] = emptyFigure();
+        figMap[qid].print =  fig1.print;
         addState(fig1);
-        _render("<h.id><i>", z , width = width, height = height, align = align, fillColor = fillColor, lineColor = lineColor,
+        _render(qid, z , width = width, height = height, align = align, fillColor = fillColor, lineColor = lineColor,
         borderWidth = borderWidth, borderStyle = borderStyle, borderColor = borderColor, display = display, event = event
         , resizable = resizable,
-        defined = defined, cssFile = cssFile);
+        defined = defined, cssFile = cssFile, print = fig1.print);
         i = i +1;
-        }
+       }
      }
      
   //public void main() {

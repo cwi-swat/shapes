@@ -197,7 +197,7 @@ public data Figure(
 		int hgap = 0,
 		int vgap = 0,
         bool sizeFromParent = false,
-        
+        bool print = true, 
     	// Line properties
 		int lineWidth = -1,			
 		str lineColor = "", 		
