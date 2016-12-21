@@ -72,9 +72,12 @@ public void standard() {
  // )
  // ;
  
-// Figure simple() =  hcat(figs=[box(size=<30, 30>, fillColor="blue"), box(size=<50, 50>, fillColor="yellow"), box(size=<70, 70>, fillColor=  "red")],align= topLeft);
 
-public Figure innerCircle = circle(shrink=0.6, lineWidth=8, fillColor = "antiquewhite", align = centerRight, lineColor="green");
+               
+public Figure innerCircle = circle(shrink=0.6, lineWidth=8, fillColor = "antiquewhite", align = centerRight, lineColor="green"
+,event = on("click", void(str e,str n, str v) {      
+           setFigure(extra());
+      }));
 
 Figure simple() {
   
@@ -89,6 +92,13 @@ Figure simple() {
 )
 )]);}
 
+public Figure extra() = hcat(figs=[
+           box(size=<100, 100>, 
+           event=on("click", void(str e, str n, str v) {setFigure(simple());})
+           )
+           ])
+           ;
+
 // Figure simple() = box(grow=1.5, fig=hcat(figs=[box(size=<50, 50>, fillColor="red")]));
 //Figure simple() = 
 //    box(fig=hcat(size=<600, 400>, hgap = 20, figs=[
@@ -98,20 +108,21 @@ Figure simple() {
 //   ;
 
  
- public void tsimple() = render(simple(), size=<600, 600>);
+ public void tsimple() = render(extra(), size=<600, 600>);
  
  
  public void fsimple(loc l) = writeFile(l, toHtmlString(
-   simple(), strInput(size=<100, 20>, print = false)
+   extra() // , strInput(size=<100, 20>, print = false)
  )); 
  
  Figure input() {return  strInput(size=<100, 20>, print = false);}
  
  list[Figure()] inputs = [simple, input];
  
- public void psimple() = renderShow(simple , input
-    ,screenWidth = 700, screenHeight = 700, javaLoc=|file:///ufs/bertl/jdk1.8.0_77|,
-    beforeLoad=void(){println("beforeLoad"); setCurrentFigures(inputs);});
+ public void psimple() = renderShow(/*simple() , input()*/ extra()
+    ,screenWidth = 700, screenHeight = 700, javaLoc=|file:///ufs/bertl/jdk1.8.0_77|
+    , static = false
+       );
                               
 public Figure idCircleShrink(num shrink) = circle(shrink= shrink, lineWidth = 4, lineColor = pickColor());
 
@@ -841,9 +852,57 @@ Figure face() = pack([box(grow=1.0, fig=
                 //])
                 )])
                        ;
-    
-void tface() = render(face(), size=<800, 800>); 
-
+                       
 void fface(loc l) = writeFile(l, toHtmlString(face())); 
+
+    
+void tface() = render(face(), size=<800, 800>);
+
+Figure range(str id ,num v) {
+   return rangeInput(id=id, low=10, high=200, step=1, \value = v, print = false
+   // , event = on("change", void(str e, str n, str v){;})
+   );
+   } 
+
+void adjust(str e, str n, str v) {
+      value xv = (property("x")?)?property("x").\value:10; 
+      value yv = (property("y")?)?property("y").\value:10 ;    
+      if (num x:=xv && num y:=yv) {
+           int rx = toInt(x); 
+           int ry = toInt(y);
+           setFigure(
+                 [
+                 ellipse(rx = rx, ry = ry)
+                 ,range("x", rx)
+                 ,range("y", ry)
+                 ,buttonInput("Enter", event = on("click", adjust), print = false)
+                ]
+              );
+           }
+      }
+
+Figures para()  { 
+               value xv = (property("x")?)?property("x").\value:10;
+               value yv = (property("y")?)?property("y").\value:10;
+               if (num x:=xv && num y := yv) {
+               int rx = toInt(x), ry = toInt(y);
+               return [
+                 ellipse(rx = rx, ry = ry)
+                 ,range("x", rx)
+                 ,range("y", ry)
+                 ,buttonInput("Enter", event = on("click", adjust), print = false)
+                ];
+                }
+               }
+
+void tpara() = render(para());  
+
+void fpara(loc l) = writeFile(l, toHtmlString(para())); 
+
+void ppara() = renderShow(para()
+    ,screenWidth = 700, screenHeight = 700, javaLoc=|file:///ufs/bertl/jdk1.8.0_77|
+    , static = false
+       );
+                              
 
 

@@ -17,10 +17,14 @@ import util::Math;
 import shapes::Figure;
 import shapes::Tree;
 import util::Reflective;
+import util::Eval;
  
 private loc base = getModuleLocation("shapes::Figure").parent;
 
+private bool reload = false;
+
 public loc getBase()= base;
+
 
 alias Options = tuple[
        int width, int height
@@ -102,9 +106,7 @@ public map[str, list[IFigure] ] defs = ();
 
 list[IFigure] currentFigs = [];
 
-list[Figure()] currentFigures = [];
-
-void() beforeLoad = void(){return;};
+list[Figure] currentFigures = [];
 
 int upperBound = 99999;
 int lowerBound = 2;
@@ -244,14 +246,10 @@ void addState(Figure f) {
     old+= prop;
     }
     
-public void _setCurrentFigures(list[Figure()] figs) {
+public void _setFigures(list[Figure] figs) {
     currentFigures = figs;
+    reload = true;
     }
-    
-public void _setBeforeLoad(void() f) {
-   println("_setBeforeLoad:<f>");
-   beforeLoad = f;
-   }
       
 public void clearWidget() { 
     // println("clearWidget");
@@ -435,20 +433,17 @@ str getIntro() {
 	return replaceAll(res,"\n\n", "");
 	}
 	
-Response page(get(/^\/eclipse$/)) { 
+Response page(get(/^\/static$/)) { 
 	return response(getIntro());
 }
 
-Response page(get(/^\/fx$/)) { 
-    println("reload:<size(currentFigures)>");
-    beforeLoad();
-    Figures fig = [f()|f<-currentFigures];
-    _render(fig, width = options.width,  height = options.height,  align = options.align
+Response page(get(/^\/dynamic$/)) { 
+     _render(currentFigures, width = options.width,  height = options.height,  align = options.align
            ,fillColor = options.fillColor
            ,lineColor = options.lineColor, size = options.size, display = options.display
            ,borderWidth = options.borderWidth, borderStyle = options.borderStyle, resizable = options.resizable
            ,cssFile = options.cssFile, defined = options.defined, lineWidth = options.lineWidth, event = options.event
-           );  
+           ); 
 	return response(getIntro());
 }
 
@@ -591,6 +586,13 @@ Response page(req:post(/^\/getValue\/<ev:[a-zA-Z0-9_]+>\/<name:[a-zA-Z0-9_]+>\/<
 	    changedMap[name]["prompt"]=g;
 	else
 	    changedMap[name] = ("prompt":g);
+	 if (reload) {
+	     if (changedMap[name]?)
+	          changedMap[name]["reload"]="reload";
+	     else
+	       changedMap[name] = ("reload":"reload");
+	       reload = false;
+	     }
 	old = [s.v|s<-state];
 	prompt = <"", "">; 
 	//return response("<res>"); 
@@ -804,6 +806,7 @@ str getFillColor(Figure f) {
         }
    value v = f.tooltip;
    if (c=="none" && (Figure x := v || (str q := v) && !isEmpty(q))) c = "white";
+   if (c=="none" && noEvent()!:=f.event) c = "white";
    return c;
   } 
    
@@ -2021,6 +2024,8 @@ IFigure _rangeInput(str id, Figure f, bool addSvgTag) {
        int width = f.width;
        int height = f.height; 
        str begintag = "";
+       void nothing(str e, str n, str v) {;};
+       if (f.event==noEvent()) f.event=on("change", nothing);
        if (addSvgTag) {
           begintag+=
          "\<svg id=\"<id>_svg\"\>  
@@ -2036,9 +2041,9 @@ IFigure _rangeInput(str id, Figure f, bool addSvgTag) {
             endtag += "\</foreignObject\>\</svg\>"; 
           }
         // println("id=<id>");
-        widget[id] = <getCallback(f.event), seq, id, begintag, endtag, 
+        widget[id] = <getCallback(f.event),seq, id, begintag, endtag, 
         "   
-        'd3.select(\"#<id>\")<on(getEvent(f.event), "doFunction(\"<getEvent(f.event)>\", \"<id>\")")>
+        'd3.select(\"#<id>\")<on(getEvent(f.event), "doFunction(\"change\", \"<id>\")")>
         '<stylePx("width", width)><stylePx("height", height)> 
         '<attrPx("w", width)><attrPx("h", height)>     
         '<debugStyle()>

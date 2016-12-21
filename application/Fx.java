@@ -47,20 +47,21 @@ ArrayList<Node> removeButtons(WebEngine webEngine) {
         Element elementById = document.getElementById("body");
     	NodeList childNodes = elementById.getChildNodes();
     	ArrayList<Node> arrayList = new ArrayList<Node>();
-    	   for (int i=2;i<childNodes.getLength();i++) { 
+    	   for (int i=0;i<childNodes.getLength();i++) { 
     		   Node node = childNodes.item(i);
     		   if (node.hasAttributes()) {
     		     NamedNodeMap attributes = node .getAttributes();
     		     if (
                  attributes.getNamedItem("class")!=null && attributes.getNamedItem("class").getNodeValue().equals("button")) {
-    	  	     arrayList.add(
-    		         elementById.removeChild(childNodes.item(i))
-    	  			 )
-	               ;
+    	  	         arrayList.add(childNodes.item(i));
     		     }
     	        }	
     	   }
-    return arrayList;
+    	   for (Iterator<Node> iterator = arrayList.iterator(); iterator.hasNext();) {
+			Node n = iterator.next();
+			elementById.removeChild(n);
+		   }
+    	  return arrayList;
 	}
 
 	@Override

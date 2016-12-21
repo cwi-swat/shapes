@@ -819,7 +819,7 @@ list[Figure] sb(list[Figure] tt) = [sb(f)|Figure f<-tt];
  
  // Figure _pdemo() = pack([demo1(), demo2()]);
  
- void pdemo()= render(packList());
+ void pdemo()= render(packList(),static = false);
  
  void fpdemo(loc l) {
       writeFile(l, toHtmlString(packList()));

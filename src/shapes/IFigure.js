@@ -195,6 +195,10 @@ function ask2Server(site, ev, id, v, parameters) {
 					if (a != null && a != "") {
 						alert(a);
 					}
+					var reload = t[d]["reload"];
+					if (reload != null && reload != "") {
+					    window.location.reload(true);
+					    }
 					if (t[d]["property"] != null)
 						for ( var i in t[d]["property"]) {
 							var v = t[d]["property"][i];
