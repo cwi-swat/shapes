@@ -44,7 +44,7 @@ public class Fx extends Application {
 	
 ArrayList<Node> removeButtons(WebEngine webEngine) {
 		Document document = webEngine.getDocument();
-        Element elementById = document.getElementById("body");
+        Element elementById = document.getElementById("figureArea");
     	NodeList childNodes = elementById.getChildNodes();
     	ArrayList<Node> arrayList = new ArrayList<Node>();
     	   for (int i=0;i<childNodes.getLength();i++) { 
@@ -68,14 +68,14 @@ ArrayList<Node> removeButtons(WebEngine webEngine) {
 	public void start(Stage primaryStage) {
 		primaryStage.setMinWidth(width);
 		primaryStage.setMinHeight(height);
-		System.out.println("start:" + fname + ":" + width);
+		System.out.println("start:" + fname + ":" + height);
 		// Group root = new Group();
-		VBox box = new VBox();
 		final WebView wb = new WebView();
 		final WebEngine webEngine = wb.getEngine();
-		box.getChildren().add(wb);
-		final Scene scene = new Scene(box, width, height);
 		final Button buttonSave = new Button("Save");
+		wb.setMinHeight(height);
+		VBox box = new VBox(wb);	
+		final Scene scene = new Scene(box);
 		if (!snapshot) box.getChildren().add(buttonSave);
 		buttonSave.setOnAction(new EventHandler<ActionEvent>(){
             @Override

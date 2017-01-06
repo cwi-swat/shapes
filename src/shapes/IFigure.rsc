@@ -108,6 +108,8 @@ list[IFigure] currentFigs = [];
 
 list[Figure] currentFigures = [];
 
+tuple[int width, int height] screen = <-1, -1>;
+
 int upperBound = 99999;
 int lowerBound = 2;
 
@@ -269,6 +271,7 @@ public void clearWidget() {
     tooltips = [];
     panels = [];
     _display = true;
+    screen = <-1, -1>;
     }
     
 str visitFig(IFigure fig) {
@@ -280,13 +283,14 @@ str visitFig(IFigure fig) {
     
               
 str visitFig(list[IFigure] figs) {
-    str r = "";
+    str r = "\<div id=\"figureArea\"\>";
     for (IFigure fig<-figs) {
        bool print = (figMap[fig.id]?)?figMap[fig.id].print:true;
        r+="\<div class=\"<print?"page":"button">\"\>";
        r+=visitFig(fig);
        r+="\</div\>";
        }
+    r+="\</div\>";
     return r;
     }
  
@@ -409,6 +413,7 @@ str getIntro() {
         ' setSite(\"<getSiteStr()>\");    
         ' function initFunction() {
         '  alertSize();
+        ' d3.select(\"#figureArea\")<style("width", screen.width)><style("height", screen.height)>;
         '  <for (d<-markerScript) {> <d> <}>
         '  <for (d<-widgetOrder) {> <widget[d].script> <}>
         '  <for (d<-reverse(adjust)) {> <d> <}>
@@ -709,11 +714,6 @@ public void _render(str id, IFigure fig1, int width = 800, int height = 800,
     widget[id] = <(display?getRenderCallback(event):null), seq, id, begintag, endtag, 
         "
         'd3.select(\"#<id>\")       
-        '<if(defined){>
-        '      <attrPx("w", width)><attrPx("h", height)>
-        '<}else{>
-        '   <attr1("w", "screenWidth")> <attr1("h", "screenHeight")> 
-        '<}>
         '<style("border","0px solid black")> 
         '<style("border-width",borderWidth)>
         '<style("border-style",borderStyle)>
@@ -3000,7 +3000,8 @@ public void _render(Figure f..., int width = -1, int height = -1,
         h.id = "figureArea";
         figMap[h.id] = h;
         fig=[];
-        int i = 0;
+        int i = 0;  
+        screen.width = width; screen.height = height;
       for (Figure fig1<-f) {
         if (atXY(_, _, _):= fig1 || atX(_,_):=fig1 || atY(_,_):=fig1){
              align = topLeft; 
@@ -3026,7 +3027,7 @@ public void _render(Figure f..., int width = -1, int height = -1,
         figMap[qid] = emptyFigure();
         figMap[qid].print =  fig1.print;
         addState(fig1);
-        _render(qid, z , width = width, height = height, align = align, fillColor = fillColor, lineColor = lineColor,
+        _render(qid, z , align = align, fillColor = fillColor, lineColor = lineColor,
         borderWidth = borderWidth, borderStyle = borderStyle, borderColor = borderColor, display = display, event = event
         , resizable = resizable,
         defined = defined, cssFile = cssFile, print = fig1.print);
