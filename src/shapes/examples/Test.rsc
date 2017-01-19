@@ -59,6 +59,13 @@ public void standard() {
      
  public void ttests() = render(tests()); 
  
+ void ptests(){
+   // render(examples()
+   renderShow(tests(), javaLoc=|file:///ufs/bertl/jdk1.8.0_77|
+    , screenWidth=900, screenHeight = 1000, height = 900
+    );
+    }
+ 
  
  public void ftests(loc l) = writeFile(l, toHtmlString(
    tests()
@@ -875,6 +882,57 @@ void ppara() = renderShow(para()
     ,screenWidth = 700, screenHeight = 700, javaLoc=|file:///ufs/bertl/jdk1.8.0_77|
     , static = false
        );
+       
+
+list[tuple[num, num]] points(num alpha, num phi, num r1, num r2) { 
+                               tuple[num, num] v = 
+                                <(-(r1+r2)/2)*(cos(alpha+2*phi/3)-cos(alpha+phi/3))
+                                ,
+                                 (-(r1+r2)/2)*(sin(alpha+2*phi/3)-sin(alpha+phi/3))
+                                >;
+                                return [
+                                 <(-(r1+r2)/2)*cos(alpha+phi/3)-0.8*v[0], (-(r1+r2)/2)*sin(alpha+phi/3)-0.8*v[1]>
+                                 , 
+                                 <(-(r1+r2)/2)*cos(alpha+phi/3)+1.8*v[0], (-(r1+r2)/2)*sin(alpha+phi/3)+1.8*v[1]>
+                                ];
+                                }
+       
+
+list[tuple[num, num]] reversePath(num alpha, list[tuple[num, num]] curve) = alpha<PI()?curve:reverse(curve);
                               
 
+Figure _disk(num alpha, num phi, str color, num r1, num r2) {
+      list[tuple[num, num]] pts = reversePath(alpha, points(alpha,phi, r1, r2));
+      Figure r = overlay(figs=[
+       path(t_.r(alpha, 0, 0), 100,  600, 600
+               ,[p_.segment(r1, r2, phi)], lineColor="grey", lineWidth =1, fillColor=color, size=<1200, 1200>)
+               , textPath("", 100, 600, 600, [p_.M(pts[0][0],pts[0][1])]+[p_.L(p[0], p[1])|tuple[num, num] p<-tail(pts)]
+               , [color, getColorCode(color)], display =false, fontSize=12, fontWeight="bold", fillColor=color)
+       ]);
+      return r;
+      }
+      
 
+      
+Figure disk(int n) {
+    num unit = 2*PI()/n;
+    resetColor();
+    return overlay(figs = 
+        [
+       _disk(unit*i, unit, pickColor(), 4, 3.4)|i<-[0..n]]+
+        [_disk(unit*i, unit, pickColor(), 3.4, 2.8)|i<-[0..n]]
+      , size=<1200, 1200>);
+    }
+      
+void tdisk() = render(disk(10));  
+
+void fdisk(loc l) = writeFile(l, toHtmlString(disk())); 
+
+Figure fig() {
+     Figure r = box(fig=ellipse(rx=100, ry = 50));
+     return r;
+     }
+     
+void tfig() = render(fig());  
+
+void ffig(loc l) = writeFile(l, toHtmlString(fig())); 

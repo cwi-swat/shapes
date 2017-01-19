@@ -244,6 +244,53 @@ function ask2Server(site, ev, id, v, parameters) {
 			});
 }
 
+/**
+ * Converts an RGB color value to HSL. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+ * Assumes r, g, and b are contained in the set [0, 255] and
+ * returns h, s, and l in the set [0, 1].
+ *
+ * @param   Number  r       The red color value
+ * @param   Number  g       The green color value
+ * @param   Number  b       The blue color value
+ * @return  Array           The HSL representation
+ */
+function rgbToHsl(r, g, b) {
+  r /= 255, g /= 255, b /= 255;
+
+  var max = Math.max(r, g, b), min = Math.min(r, g, b);
+  var h, s, l = (max + min) / 2;
+
+  if (max == min) {
+    h = s = 0; // achromatic
+  } else {
+    var d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+
+    h*60;
+  }
+
+  return {h:h, s:s, l:l};
+}
+
+function contrast(id, colorString) {
+	var rgb = d3.rgb(d3.color(colorString));
+	var hsl = rgbToHsl(rgb.r,rgb.g, rgb.b);
+	if (hsl.s<1.2)  {
+		hsl.l = (hsl.l <0.4? 1:0);
+		hsl.s = 0;
+	}
+	var r = d3.hsl(hsl.h,hsl.s,hsl.l);
+	d3.select("#"+id).select("text").style("fill", r).style("stroke", r);
+	return r;
+    }
+
 function CR(evt, ev, id, v) {
 	evt = evt || window.event;
 	if (evt.keyCode == 13 && v) {
@@ -302,8 +349,6 @@ function doAllFunction(ev, id) {
 			);
 		});
 		var v = this.value;
-		// alert(JSON.stringify(r));
-		// d3.selectAll("."+id+"_div").style("visibility", "hidden");
 		ask(ev, id, v, r);
 	};
 }
@@ -341,21 +386,12 @@ function alertSize() {
 
 }
 
-rxL = function(rx, ry) {
-	return rx /* * Math.sqrt(rx*rx+ry*ry)/ry */;
-};
-ryL = function(rx, ry) {
-	return ry /* * Math.sqrt(rx*rx+ry*ry)/rx */;
-};
 
 function corner(n, lineWidth) {
 	if (n == 0)
 		return lineWidth;
-	// var angle = Math.PI - 2 * Math.PI / n;
 	angle = Math.PI / n;
 	var lw = lineWidth < 0 ? 0 : lineWidth;
-	// alert(lw/Math.sin(angle))
-	// return lw;
 	return (lw / Math.cos(angle));
 }
 
@@ -385,9 +421,6 @@ function nPoints(el) {
 function fromInnerToOuterFigure(f, id1, toLw, hpad, vpad) {
 	var to = d3.select("#" + f.id);
 	var from = d3.select("#" + id1);
-	//if (from.node().nodeName == "g") {
-//	from = d3.select("#" + id1 + "_svg");
-//	}
 	var blow = 1.0;
 	if (from.node().nodeName == "rect" || from.node().nodeName == "TABLE") {
 		blow = Math.sqrt(2.0);
@@ -405,7 +438,6 @@ function fromInnerToOuterFigure(f, id1, toLw, hpad, vpad) {
 	 else {
 	 	width = document.getElementById(id1).getBoundingClientRect().width;
 	   }
-	// alert("fromInnerToOuter:"+id1+" "+width+" "+ from.node().nodeName+" "+fromLw);
 	var height = 0;
 	if (!invalid(from.attr("height")))
 		height = parseInt(from.attr("height"));
@@ -415,7 +447,6 @@ function fromInnerToOuterFigure(f, id1, toLw, hpad, vpad) {
 	    }
 	else
 	 	height = document.getElementById(id1).getBoundingClientRect().height;
-	// alert("height:"+height+":"+document.getElementById(id1).getBoundingClientRect().height+":"+id1);
 	if (width == 0 || height == 0)
 		return;
 	toLw = corner(f.n, toLw);
@@ -480,9 +511,7 @@ function fromInnerToOuterFigure(f, id1, toLw, hpad, vpad) {
 
 function translatePoints(angle, n, r, x, y) {
 	var q = new Array();
-	// alert(f.angle);
 	var p = angle / 360.0 * 2 * Math.PI;
-	// alert(p);
 	var angl = 2 * Math.PI / n;
 	for (var i = 0; i < n; i++) {
 		q.push({
@@ -504,8 +533,6 @@ function _adjust(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y, width,
 		height) {
 	var to = d3.select("#" + toId);
 	toLw = corner(n, toLw);
-	//width = width -  x;
-	//height = height - y;
 	var w = Math.ceil(width * hshrink)-toLw-x;
 	var h = Math.ceil(height * vshrink)-toLw-y;
 	var  invalidW = invalid(to.attr("width"))&&invalid(to.attr("w"));
@@ -519,9 +546,6 @@ function _adjust(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y, width,
 		if (invalidW && invalid(to.style("width"))) to.attr("w", w).style("width", w);	
 		if (invalidH && invalid(to.style("height"))) to.attr("h", h).style("height", h);
 		break;
-	//case "g" :
-	//	 to.attr("width", w).attr("height", h);
-	//	 break;
 	case "rect":
 		if (invalidW) to.attr("width", w);
 		if (invalidH) to.attr("height", h);
@@ -564,11 +588,8 @@ function _adjust(toId, fromId, hshrink, vshrink, toLw, n, angle, x, y, width,
 		break;
 	}
 	;
-	//d3.select("#" + toId + "_mirror").attr("transform",
-	//		"scale(1,-1)translate(0,"+(-h)+")");
 	to = d3.select("#" + toId + "_fo_table");
 	if (invalidW) {
-		 // alert("adjust:"+toId+":"+w+":"+toLw+":"+(w-toLw));
 		 d3.select("#" + fromId + "_"+toId).style("width", width);
 	     to.attr("w", w - toLw).style("width", w - toLw);
 	     d3.select("#" + toId).attr("w", w - toLw);
@@ -734,9 +755,7 @@ function adjustTableFromCells(id1, clients) {
 	var height = d3.select("#" + id1).attr("h");
 	if (invalid(height) && aUndefH.length == 0) {
 		height = document.getElementById(id1).getBoundingClientRect().height;
-		// height = document.getElementById(id1).outerHeight;
 		d3.select("#" + id1).attr("h", "" + height + "px");
-		//d3.select("#" + id1).style("height", "" + height + "px");
 	}
 	if (invalid(width) || invalid(height))
 		return;
@@ -784,22 +803,17 @@ function adjustGridTableFromCells(id1, clients) {
 			"height", "" + height )
 	d3.select("#" + id1 + "_svg").attr("width", "" + width).attr(
 			"height", "" + height);
-	// alert("adjustTableWH1:"+width);
 }
 
 function adjustOverlayFromCells(clients, id1, lw, hpad, vpad) {
 		var width = 0;
 		var height = 0;
-		// var lw0 = 0;
 		var isEmpty = false;
 		for (var i = 0; i < clients.length; i++) {
-			// var d = d3.select("#" + clients[i].id);
 			var e = d3.select("#" + clients[i].id + "_svg");
 			if (!e.empty()) {
 				w = parseInt(e.attr("width")) + parseInt(e.attr("x"));
-				// alert(clients[i].id+" "+e.attr("width"));
 				h = parseInt(e.attr("height")) + parseInt(e.attr("y"));
-				// if (clients[i].lw>lw0) lw0 = clients[i].lw;
 				if (w > width)
 					width = w;
 				if (h > height)
@@ -812,7 +826,6 @@ function adjustOverlayFromCells(clients, id1, lw, hpad, vpad) {
 		if (!isEmpty) {
 			c = d3.select("#" + id1);
 			c.attr("width", width).attr("height", height);
-			// alert("AdjustOverlayFromCells:"+c.attr("width")+" "+lw0);
 			c = d3.select("#" + id1 + "_svg");
 			c.attr("width", width).attr("height", height);
 			
@@ -859,13 +872,10 @@ function adjustOverlayCells(clients, id1, lw, hpad, vpad) {
 		} else
 			return;
 	}
-	// alert(width);
 	if (!invalid(width) && !invalid(height)) {
 		var aUndefWH = clients.filter(undefWH);
 		var w = parseInt(width);
 		var h = parseInt(height);
-		// alert(aUndefWH.length);
-		// alert(""+id1+" "+width+" "+aUndefWH.length+" "+clients.length);
 		for (var i = 0; i < aUndefWH.length; i++) {
 			adjustClient(id1, aUndefWH[i], w, h);
 		}

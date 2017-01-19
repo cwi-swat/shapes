@@ -48,14 +48,14 @@ public Figure fsm(){
 }
 
 
-
+void tgraph() {Figure f = box(fig=fsm()); render(f);}
   
 Figure _bfsm() {Figure f = fsm(); return finalStateMachine(f, f.nodes[0][0]);}
 
 
 public void bfsm() = render(_bfsm());
 
-public void ffsm(loc l) = writeFile(l, toHtmlString(fsm()));
+public void fgraph(loc l) = writeFile(l, toHtmlString(box(fig=fsm())));
 
 public Figure tree1() = tree(box(fillColor="red", size=<10, 10>), [box(size=<10, 10>, fillColor="green")]);
 /*
