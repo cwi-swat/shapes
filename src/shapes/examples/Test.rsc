@@ -929,7 +929,9 @@ void tdisk() = render(disk(10));
 void fdisk(loc l) = writeFile(l, toHtmlString(disk())); 
 
 Figure fig() {
-     Figure r = box(fig=ellipse(rx=100, ry = 50));
+     // Figure r = box(fig=ellipse(rx=100, ry = 50));
+     Figure r= box(width=160, height= 160, fillColor="red", lineWidth = 16, lineColor="brown"
+    ,fig=box(width=40, height=40, lineWidth = 4, lineColor="green", fillColor="antiquewhite"), align=bottomLeft);
      return r;
      }
      

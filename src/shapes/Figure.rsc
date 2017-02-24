@@ -178,7 +178,7 @@ public data Figure(
         str visibility = "",  // hidden | visible
 		// Dimensions and Alignmenting
 		tuple[int,int] size = <0,0>,
-		tuple[int, int, int, int] padding = <0, 0, 0, 0>, // left, top, right, bottom 
+		tuple[int left, int top, int right, int bottom] padding = <0, 0, 0, 0>, // left, top, right, bottom 
 		int width = -1,
 		int height = -1,
 		Position at = <0, 0>,
@@ -202,11 +202,11 @@ public data Figure(
 		int lineWidth = -1,			
 		str lineColor = "", 		
 		list[int] lineDashing = [],	
-		real lineOpacity = -1.0,
+		num lineOpacity = -1,
 	
 		// Area properties
 		str fillColor    = "none", 			
-		real fillOpacity = -1.0,	
+		num fillOpacity = -1,	
 		str fillRule     = "evenodd",
 		list[str] clipPath = [],
 		
@@ -221,7 +221,7 @@ public data Figure(
 		str fontWeight = "", // normal|bold|bolder|lighter|number|initial|inherit; normal==400, bold==700
 		str fontColor = "",  // default "black",
 		str textDecoration	= "", // none|underline|overline|line-through|initial|inherit
-		real fontLineWidth = -1.0,
+		num fontLineWidth = -1,
 		str fontLineColor = "",
 		
 		
