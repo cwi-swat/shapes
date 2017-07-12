@@ -23,10 +23,12 @@ Program buildProgram(node _program) {
     if (list[node] statements:=_program.body)
            return program([buildStatement(statement)|statement<-statements]);
     }
- //  block(list[Statement] stats)
- 
-// \if(Expression \test, Statement consequent, Statement alternate)
-//   \if(Expression \test, Statement consequent)  
+    
+//  | doWhile(Statement body, Expression \test)
+// functionDecl(str id, list[Identifier] params, list[Statement] statBody, bool generator)
+// forIn(list[VariableDeclarator] decls, str kind, Expression right,Statement body)
+// forIn(Expression left, Expression right, Statement body)
+
 Statement buildStatement(node _statement) {
     switch(_statement.\type)  {
      case "VariableDeclaration": 
@@ -34,14 +36,84 @@ Statement buildStatement(node _statement) {
          && str kind:= _statement.kind) 
         return 
          Statement::varDecl([buildVariableDeclarator(variableDeclarator)|variableDeclarator<-variableDeclarators], kind);
+     case "FunctionDeclaration":
+         if (node id := _statement.id && list[node] params := _statement.params && node body :=  _statement.body
+             && bool generator := _statement.generator && list[node] stats:=body.body && str name := id.name) {
+               return functionDecl(name, [buildIdentifier(v)|node v<-params], [buildStatement(stat)|stat<-stats], generator);
+               }
      case "ExpressionStatement": 
         if (node _expression:=_statement.expression)  return Statement::expression(buildExpression(_expression));
      case "EmptyStatement": return Statement::empty();
      case "BlockStatement": 
       if (list[node] stats:=_statement.body)
         return 
-         Statement::block([buildStatement(stat)|stat<-stats]);   
-     }     
+         Statement::block([buildStatement(stat)|stat<-stats]);  
+     case "IfStatement":  
+        if (node condition:=_statement.\test && node consequent:=_statement.consequent)
+          if (_statement.alternate?) {
+               if (node alternate :=_statement.alternate)
+                  return Statement::\if(buildExpression(condition), buildStatement(consequent), buildStatement(alternate));
+            }
+          else 
+            return Statement::\if(buildExpression(condition), buildStatement(consequent)); 
+     case "ForStatement": {
+        ForInit forInit = ForInit::none(); 
+        if (_statement.init? && node init := _statement.init) {
+              if (init.\type=="VariableDeclaration" && list[node] variableDeclarators:= init.declarations 
+                     && str kind:= init.kind) {
+              forInit = 
+              ForInit::varDecl([buildVariableDeclarator(variableDeclarator)|variableDeclarator<-variableDeclarators], kind);
+              }
+              else forInit = ForInit::expression(buildExpression(init));
+              } 
+        Expression condition = undefined();
+        if (_statement.\test? && node _condition := _statement.\test) {
+           condition = buildExpression(_condition);
+           }
+        Expression update = undefined();
+        if (_statement.\update? && node _update := _statement.\update) {
+           update = buildExpression(_update);
+           }
+        if (node body := _statement.body) {
+           return \for(forInit, condition, buildStatement(body), update);
+           }  
+        }
+     case "ForInStatement": {
+        if (node _right := _statement.right && node body := _statement.body)
+        if (node _left := _statement.left) {
+              if (_left.\type=="VariableDeclaration" && list[node] variableDeclarators:= _left.declarations 
+                     && str kind:= _left.kind) {
+                return forIn([buildVariableDeclarator(variableDeclarator)|variableDeclarator<-variableDeclarators], kind 
+                ,buildExpression(_right), buildStatement(body));
+              }
+            return forIn(buildExpression(_left),buildExpression(_right),buildStatement(body));
+            } 
+        }
+     case "WhileStatement": {
+        if( node condition := _statement.\test && node body:=_statement.body)
+           return \while(buildExpression(condition), buildStatement(body));
+        }
+     case "DoWhileStatement": {
+        if( node condition := _statement.\test && node body:=_statement.body)
+           return dowhile(buildExpression(condition), buildStatement(body));
+        }  
+     case "ReturnStatement": {
+        if (_statement.argument? && node argument := _statement.argument)
+          return \return(buildExpression(argument));
+        return(\return());
+        }
+     case "BreakStatement": {
+        if (_statement.label? && node label := _statement.label && str name:=label.name)
+          return \break(name);
+        return(\break());
+        }
+      case "ContinueStatement": {
+        if (_statement.label? && node label := _statement.label && str name:=label.name)
+          return \continue(name);
+        return(\continue());
+        }
+      }
+     println(_statement.\type);      
     }
     
 VariableDeclarator buildVariableDeclarator(node _variableDeclarator) {
@@ -69,7 +141,8 @@ tuple[LitOrId key, Expression \value, str kind]  buildObjectProperty(node _objec
                  return <LitOrId::lit(string(name)), buildExpression(val), "">; 
         }      
     }
-
+//member(Expression object, str strProperty)
+//  member(Expression object, Expression expProperty)
 Expression buildExpression(node _expression) {
     switch(_expression.\type)  {
         case "BinaryExpression": 
@@ -99,10 +172,16 @@ Expression buildExpression(node _expression) {
             if (num v := _expression.\value)
                return literal(number(v)); 
             }
+         case "BooleanLiteral": {
+            if (bool v := _expression.\value)
+               return literal(boolean(v)); 
+            }
+        case "NullLiteral": return literal(null()); 
         case "StringLiteral": {
             if (str v := _expression.\value)
                return literal(string(v)); 
             }
+        case "ThisExpression": return this();
         case "Identifier": {
             if (str name:=_expression.name)
                  return Expression::variable(name);               
@@ -119,11 +198,29 @@ Expression buildExpression(node _expression) {
                   return call(buildExpression(callee), [buildExpression(argument)|node argument<-arguments]); 
         case "ArrayExpression":
              if (list[node] elements:= _expression.elements)
-                  return array([buildExpression(element)|node element<-elements]);
+                  return Expression::array([buildExpression(element)|node element<-elements]);
         case "ObjectExpression":
              if (list[node] properties:= _expression.properties)
-                  return object([buildObjectProperty(property)|node property<-properties]);                 
-        }                        
+                  return object([buildObjectProperty(property)|node property<-properties]);   
+        case "FunctionExpression":
+         if (list[node] params := _expression.params && node body :=  _expression.body
+             && bool generator := _expression.generator && list[node] stats:=body.body) {
+             if (_expression.id? && node id := _expression.id && id.name? && str name := id.name)
+               return Expression::function(name, [buildIdentifier(v)|node v<-params], [buildStatement(stat)|stat<-stats], generator);
+             return Expression::function("", [buildIdentifier(v)|node v<-params], [buildStatement(stat)|stat<-stats], generator);
+              } 
+         case "MemberExpression": {
+            if (node object:=_expression.object 
+             && node property:=_expression.property 
+             && bool computed:=_expression.computed) {
+             if (computed) {
+                return member(buildExpression(object), buildExpression(property));
+                }
+              if (str name:=property.name) return member(buildExpression(object), name); 
+              } 
+             }           
+        } 
+    println(_expression.\type);                       
     return literal(number(-1));
     }
     
@@ -194,7 +291,7 @@ UpdateOperator buildUpdateOperator(str operator) {
       }
    }
 
-LogicalOperator buildUpdateOperator(str operator) {
+LogicalOperator buildLogicalOperator(str operator) {
     switch(operator) {
       case "&&": return LogicalOperator::and();
       case "||": return LogicalOperator::or();
@@ -248,23 +345,15 @@ guardedHandlers)
   | \try(list[Statement] block, list[CatchClause] guardedHandlers)
   | \while(Expression \test, Statement body)
   | doWhile(Statement body, Expression \test)
-  | \for(ForInit init, list[Expression] exps, Statement body) // exps contains test, update
+  | \for(ForInit init, Expression condition, Statement body, Expression update) // exps contains test, update
   | forIn(list[VariableDeclarator] decls, str kind, Expression right,Statement body)
   | forIn(Expression left, Expression right, Statement body)
   | forOf(list[VariableDeclarator] decls, str kind, Expression right, Statement body)
   | forOf(Expression left, Expression right, Statement body)
   | let(list[tuple[Pattern id, Init init]] inits, Statement body)
   | debugger()
-  | functionDecl(str id, list[Pattern] params,
-  list[Expression] defaults,
-  str rest, // "" = null
-  list[Statement] statBody,
-  bool generator)
-  | functionDecl(str id, list[Pattern] params,
-  list[Expression] defaults,
-  str rest, // "" = null
-  Expression expBody,
-  bool generator)
+  | functionDecl(str id, list[Identifier] params, list[Statement] statBody, bool generator)
+ //  | functionDecl(str id, list[Pattern] params, list[Expression] defaults, str rest, Expression expBody, bool generator)
   | varDecl(list[VariableDeclarator] declarations, str kind)
   ;
 
@@ -284,27 +373,23 @@ data Expression
   | array(list[Expression] elements)
   | object(list[tuple[LitOrId key, Expression \value, str kind]]
 properties)
-  | function(str name, // "" = null
-            list[Pattern] params,
-            list[Expression] defaults,
-            str rest, // "" = null
-            list[Statement] statBody) // ,
+  | function(str id, list[Identifier] params, list[Statement] statBody, bool generator)
             //bool generator = false)
-  | function(str name, // "" = null
-            list[Pattern] params,
-            list[Expression] defaults,
-            str rest, // "" = null
-            Expression expBody)
+  //| function(str name, // "" = null
+  //          list[Pattern] params,
+  //          list[Expression] defaults,
+  //          str rest, // "" = null
+  //          Expression expBody)
             //,
             //bool generator = false)
-  | arrow(list[Pattern] params,
-  list[Expression] defaults,
-            str rest, // "" = null
-            list[Statement] statBody)
-  | arrow(list[Pattern] params,
-  list[Expression] defaults,
-            str rest, // "" = null
-            Expression expBody)
+  //| arrow(list[Pattern] params,
+  //list[Expression] defaults,
+  //          str rest, // "" = null
+  //          list[Statement] statBody)
+  //| arrow(list[Pattern] params,
+  //list[Expression] defaults,
+  //          str rest, // "" = null
+  //          Expression expBody)
   | sequence(list[Expression] expressions)
   | unary(UnaryOperator operator, Expression argument, bool prefix)
   | binaryExpression(Expression left, BinaryOperator binaryOp, Expression right)
