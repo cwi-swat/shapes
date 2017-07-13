@@ -47,7 +47,11 @@ Statement buildStatement(node _statement) {
      case "BlockStatement": 
       if (list[node] stats:=_statement.body)
         return 
-         Statement::block([buildStatement(stat)|stat<-stats]);  
+         Statement::block([buildStatement(stat)|stat<-stats]); 
+     // labeled(str label, Statement stat) 
+     case "LabeledStatement":
+         if (node label:=_statement.label && str name:=label.name && node body:= _statement.body) 
+            return labeled(name, buildStatement(body));
      case "IfStatement":  
         if (node condition:=_statement.\test && node consequent:=_statement.consequent)
           if (_statement.alternate?) {
@@ -56,6 +60,10 @@ Statement buildStatement(node _statement) {
             }
           else 
             return Statement::\if(buildExpression(condition), buildStatement(consequent)); 
+            // \switch(Expression discriminant, list[SwitchCase] cases)
+     case "SwitchStatement": 
+          if (node discriminant:= _statement.discriminant && list[node] cases:= _statement.cases)
+                return \switch(buildExpression(discriminant), [buildSwitchCase(\case)|node \case<-cases]);
      case "ForStatement": {
         ForInit forInit = ForInit::none(); 
         if (_statement.init? && node init := _statement.init) {
@@ -95,7 +103,7 @@ Statement buildStatement(node _statement) {
         }
      case "DoWhileStatement": {
         if( node condition := _statement.\test && node body:=_statement.body)
-           return dowhile(buildExpression(condition), buildStatement(body));
+           return doWhile(buildStatement(body), buildExpression(condition));
         }  
      case "ReturnStatement": {
         if (_statement.argument? && node argument := _statement.argument)
@@ -112,6 +120,25 @@ Statement buildStatement(node _statement) {
           return \continue(name);
         return(\continue());
         }
+       case "ThrowStatement": {
+        if (node argument := _statement.argument)
+          return \throw(buildExpression(argument));
+        }
+        case "TryStatement": {
+            if (node block:= _statement.block && list[node] stats := block.body) 
+                if (_statement.handler? && node handler := _statement.handler) {
+                    if (_statement.finalizer? && node finalizer:=_statement.finalizer 
+                       && list[node] stats1:=finalizer.body)
+                      return \try([buildStatement(stat)|stat<-stats], buildCatchClause(handler), 
+                       [buildStatement(stat)|stat<-stats1] );
+                 return \try([buildStatement(stat)|stat<-stats], buildCatchClause(handler));
+                 } else 
+                   if (_statement.finalizer? && node finalizer:=_statement.finalizer 
+                       && list[node] stats1:=finalizer.body)
+                   {
+                   return \try([buildStatement(stat)|stat<-stats], [buildStatement(stat)|stat<-stats1] );
+                   }            
+            }
       }
      println(_statement.\type);      
     }
@@ -130,6 +157,26 @@ Init buildInit(node _variableDeclarator) {
     if (_variableDeclarator.init?) return Init::expression(buildExpression(_variableDeclarator.init));
     return Init::none();
     }
+
+SwitchCase buildSwitchCase(node _switchCase) {
+  if (list[node] stats:= _switchCase.consequent) {
+     if (_switchCase.\test? && node condition:=_switchCase.\test) 
+        return switchCase(buildExpression(condition), 
+        [buildStatement(stat)|stat<-stats]);  
+     return switchCase([buildStatement(stat)|stat<-stats]);
+     }       
+   }
+//data CatchClause
+ // = catchClause(Pattern param, Expression guard, list[Statement] statBody)
+// blockstatement
+ // | catchClause(Pattern param, list[Statement] statBody) // blockstatement
+//  ;   
+
+CatchClause buildCatchClause(node _catchClause) {
+     if (node param:=_catchClause.param && node _body:=_catchClause.body 
+           && list[node] stats := _body.body && str name:=param.name) 
+           return catchClause(variable(name), [buildStatement(stat)|stat<-stats]);      
+   }
     
 tuple[LitOrId key, Expression \value, str kind]  buildObjectProperty(node _objectProperty) {
     if (node key:=_objectProperty.key && node val := _objectProperty.\value) {
@@ -139,7 +186,11 @@ tuple[LitOrId key, Expression \value, str kind]  buildObjectProperty(node _objec
                  return <LitOrId::id(name), buildExpression(val), "">; 
         if (key.\type=="StringLiteral" && str name := key.\value)  
                  return <LitOrId::lit(string(name)), buildExpression(val), "">; 
-        }      
+        if (key.\type=="NumericLiteral" && num v := key.\value) {
+               return <LitOrId::lit(number(v)), buildExpression(val), "">; 
+            }
+        println("<key.\type>"); 
+        }            
     }
 //member(Expression object, str strProperty)
 //  member(Expression object, Expression expProperty)
@@ -181,6 +232,10 @@ Expression buildExpression(node _expression) {
             if (str v := _expression.\value)
                return literal(string(v)); 
             }
+        case "RegExpLiteral": {
+            if (str v := _expression.\pattern)
+               return literal(regExp(v)); 
+            }
         case "ThisExpression": return this();
         case "Identifier": {
             if (str name:=_expression.name)
@@ -196,12 +251,21 @@ Expression buildExpression(node _expression) {
              if (list[node] arguments:= _expression.arguments 
                   && node callee:=_expression.callee)
                   return call(buildExpression(callee), [buildExpression(argument)|node argument<-arguments]); 
+        // new(Expression callee, list[Expression] arguments)
+         case "NewExpression":
+             if (list[node] arguments:= _expression.arguments 
+                  && node callee:=_expression.callee)
+                  return new(buildExpression(callee), [buildExpression(argument)|node argument<-arguments]); 
+        case "SequenceExpression":
+             // sequence(list[Expression] expressions)
+             if (list[node] expressions:= _expression.expressions)
+                  return sequence([buildExpression(expression)|node expression<-expressions]);
         case "ArrayExpression":
              if (list[node] elements:= _expression.elements)
                   return Expression::array([buildExpression(element)|node element<-elements]);
         case "ObjectExpression":
              if (list[node] properties:= _expression.properties)
-                  return object([buildObjectProperty(property)|node property<-properties]);   
+                  return Expression::object([buildObjectProperty(property)|node property<-properties]);   
         case "FunctionExpression":
          if (list[node] params := _expression.params && node body :=  _expression.body
              && bool generator := _expression.generator && list[node] stats:=body.body) {
@@ -332,17 +396,13 @@ data Statement
   | \return(Expression argument)
   | \return()
   | \throw(Expression argument)
-  | \try(list[Statement] block, CatchClause handler, list[Statement]
-finalizer)
+  | \try(list[Statement] block, CatchClause handler, list[Statement] finalizer)
+  | \try(list[Statement] block, list[Statement] finalizer) // Bert
   | \try(list[Statement] block, CatchClause handler)
-  | \try(list[Statement] block, CatchClause handler, list[CatchClause]
-guardedHandlers, list[Statement] finalizer)
-  | \try(list[Statement] block, list[CatchClause] guardedHandlers,
-list[Statement] finalizer)
-  | \try(list[Statement] block,//tutor.rascal-mpl.org/Errors/Static/UndeclaredVariable/UndeclaredVariable.html|
-   CatchClause handler, list[CatchClause]
-guardedHandlers)
-  | \try(list[Statement] block, list[CatchClause] guardedHandlers)
+  // | \try(list[Statement] block, CatchClause handler, list[CatchClause] guardedHandlers, list[Statement] finalizer)
+ // | \try(list[Statement] block, list[CatchClause] guardedHandlers, list[Statement] finalizer)
+ //  | \try(list[Statement] block, CatchClause handler, list[CatchClause] guardedHandlers)
+ //  | \try(list[Statement] block, list[CatchClause] guardedHandlers)
   | \while(Expression \test, Statement body)
   | doWhile(Statement body, Expression \test)
   | \for(ForInit init, Expression condition, Statement body, Expression update) // exps contains test, update
