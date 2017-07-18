@@ -12,4 +12,7 @@
     </manifest>
     </jar>
 </target>
+<target name="copy_js">
+<copy file=	"lib/run.js" todir="/tmp"/>
+</target>
 </project>

@@ -7,9 +7,15 @@ import String;
 import List;
 import Node;
 import lang::json::IO;
+import util::ShellExec;
 
-value startBuild() {
-   loc src = |file:///ufs/bertl/node/data.json|;
+loc run(loc js) {
+    exec("node" , args = ["/ufs/bertl/node/tst.js", js.path]);
+    return |file://<js.path+".json">|;
+    }
+
+value javascript2Adt(loc js) {
+   loc src = run(js);
    node v = readJSON(#node, src, implicitConstructors = true, implicitNodes = true);
    // println(v);
    return build(v);
@@ -19,8 +25,8 @@ Program build(node file) {
    if (node program:=file.program) return buildProgram(file.program);
    }
 
-Program buildProgram(node _program) {
-    if (list[node] statements:=_program.body)
+Program buildProgram(value _program) {
+    if (node _body:=_program && list[node] statements:=_body.body)
            return program([buildStatement(statement)|statement<-statements]);
     }
     
@@ -324,7 +330,7 @@ AssignmentOperator buildAssignmentOperator(str operator) {
       case  "/=": return divAssign();
       case  "%=": return remAssign();
       case "\<\<=": return shiftLeftAssign() ;
-      case  "\>\>=": return iftRightAssign() ;
+      case  "\>\>=": return shiftRightAssign() ;
       case  "\>\>\>=": return longShiftRightAssign();
       case  "|=": return bitOrAssign();
       case  "^=": return bitXorAssign();
