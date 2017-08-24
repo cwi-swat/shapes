@@ -28,11 +28,14 @@ import util::ShellExec;
 @javaClass{org.rascalmpl.library.lang.javascript.m3.AST}
 public java str _parse(str iname, str code);
 
+list[int] line2Offset = [];
+
 
 loc run(loc js) {
    str iname = js.path+".js";
    str oname = js.path+".json";
    str code = readFile(|file://<iname>|);
+   line2Offset = [0]+findAll(code, "\n");
    str output = _parse(iname, code);
    writeFile(|file://<oname>|, output);
    // println(output);
@@ -69,8 +72,11 @@ value javascript2Adt(loc js) {
 }
 
 loc L(node n) {
-    if (n.\loc? && node location:= n.\loc && str src :=location.source)  {
-       return |file://<src>|;
+    if (n.\loc? && node location:= n.\loc && str src :=location.source && node \start := location.\start
+          && node end:=location.end && int line1:=\start.line && int column1:=\start.column
+          && int line2:=\end.line && int column2:=\end.column
+          )  {
+       return |file://<src>|(line2Offset[line1]+1+column1, line2Offset[line2]+1+column2, <line1, column1>, <line2, column2>);
        }
     return |file:///|; 
     }
