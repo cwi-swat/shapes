@@ -15,7 +15,7 @@ import lang::json::IO;
 
 int occur = 0;
 
-void initFigure() { occur = 0;}
+public void initFigure() { occur = 0;}
 
 /* Properties */
 
@@ -124,7 +124,7 @@ public alias Figures = list[Figure];
 
 public num nullFunction(list[num] x) { return 0;}
 
-void nullCallback(str x, str y, str z) {return;}
+public void nullCallback(str x, str y, str z) {return;}
 
 public data Attr (
     int width = -1,
@@ -316,13 +316,13 @@ public data Figure(
 
 // Figure transformations
 
-   | atXY(int x, int y, Figure fig)	
-   | atXY(tuple[int x, int y] xy, Figure fig)			// Move to Alignment relative to origin of enclosing Figure
-   | atX(int x, Figure fig)				// TODO: how to handle negative values?
-   | atY(int y, Figure fig)
+   | atXY(int x, int y, Figure fig1)	
+   | atXY(tuple[int x, int y] xy, Figure fig1)			// Move to Alignment relative to origin of enclosing Figure
+   | atX(int x, Figure fig1)				// TODO: how to handle negative values?
+   | atY(int y, Figure fig1)
    
-   | rotateDeg(num angle, int x, int y, Figure fig)
-   | rotateDeg(num angle, Figure fig)
+   | rotateDeg(num angle1, int x, int y, Figure fig1)
+   | rotateDeg(num angle1, Figure fig1)
    
 // Input elements
    | buttonInput(str txt, bool disabled=false,  value \value = "")
@@ -360,7 +360,7 @@ public data Figure(
 
    | graph(list[tuple[str, Figure]] nodes = [], list[Edge] edges = [], map[str, NodeProperty] nodeProperty = (), 
      GraphOptions graphOptions = graphOptions(), map[str, str] figId=())
-   | tree(Figure root, list[Figure] figs
+   | tree(Figure root, list[Figure] figs1
 	       ,int xSep = 1, int ySep = 2, str pathColor = "black"
 	       ,Orientation orientation = topDown()
 	       ,bool manhattan=false
