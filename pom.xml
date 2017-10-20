@@ -47,13 +47,4 @@
 			</testResource>
 		</testResources>
 	</build>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.rascalmpl</groupId>
-			<artifactId>rascal_eclipse</artifactId>
-			<version>0.8.4-SNAPSHOT</version>
-		</dependency>
-	</dependencies>
-
 </project>
